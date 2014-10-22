@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>
 #include "TinyGPS++.h"
-// #include "math.h"
+#include <EEPROM.h>
 
 #define RXPin 10
 #define TXPin 11
@@ -15,6 +15,9 @@ bool isConnected = false;
 double prevLat = 0, prevLng = 0, prevAlt = 0;
 double curLat = 0, curLng = 0, curAlt = 0;
 double movingThres = 100;
+double prevTime = 0;
+
+int address = 0;
 
 void setup()
 {
@@ -22,6 +25,8 @@ void setup()
   ss.begin(GPSBaud);
   Serial.println("GPS Start");
   Serial.println();
+
+  EEPROM.write(address, 123);
 }
 
 void loop()
@@ -31,8 +36,8 @@ void loop()
     gps.encode(t);
   }
 
-  // if (gps.location.isValid()) {
-  if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
+  if (gps.location.isValid()) {
+  // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
     if (!isConnected) {
         Serial.print("Cold Start time: ");
         Serial.print(millis());
