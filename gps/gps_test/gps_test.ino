@@ -17,7 +17,7 @@ double curLat = 0, curLng = 0, curAlt = 0;
 double movingThres = 100;
 double prevTime = 0;
 
-int address = 0;
+int address = 1023;
 
 void setup()
 {
