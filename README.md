@@ -1,4 +1,4 @@
-MecatroMouve
+MecatroMouve (Projet Mécatronique)
 ============
 
-Repository for Arduino code.
+This is the repository for the Arduino code.
