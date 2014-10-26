@@ -26,7 +26,7 @@ void loop()
 
   // there are only 512 bytes of EEPROM, from 0 to 511, so if we're
   // on address 512, wrap around to address 0
-  if (address == 512)
+  if (address == 1024)
     address = 0;
   // Teensy 1.0 has 512 bytes
   // Teensy 2.0 has 1024 bytes
