@@ -6,6 +6,14 @@
 
 #define DISTANCE 3 // en mètres
 #define FLOAT_SIZE sizeof(float)
+#define START_SIGNAL 's'
+#define END_SIGNAL 'e'
+#define RECEIVE_SIZE 4
+#define LOCAL_SIZE 12
+
+///////////////////////////////////////
+//Les données reçus
+float dataReceived[RECEIVE_SIZE];
 
 union float_bytes
 {
@@ -13,12 +21,64 @@ union float_bytes
   uint8_t b[FLOAT_SIZE];
 };
 
+////////////////////////////////////////
+//les données de CET Arduino
+float data[LOCAL_SIZE];
+
 MPL3115A2 myPressure;
 Servo myservoVertical, myservoHorizontal;
 float receive_pressure, mesure_pressure, diff_pressure;
 
-float_bytes payload;
+////////////////////////////////////////
+//mettre à jour les donnée de CET arduino
+void updateData(){
+}
 
+////////////////////////////////////////
+//recevoir les données
+void readData(){
+   if(!Serial.available())
+      return;
+   else{
+      if(Serial.read() != START_SIGNAL)
+          return;
+      else{
+          float temp[RECEIVE_SIZE];
+          for(int i = 0 ; i< RECEIVE_SIZE ; i++){
+              temp[i] = readFloat();
+          }
+          if(Serial.read() != END_SIGNAL)
+              return;
+          else for(int i = 0 ; i< RECEIVE_SIZE ; i++){
+              dataReceived[i] = temp[i];
+              Serial.print("I fucking received some shit! it is : ");
+              Serial.println(dataReceived[i]);
+          }
+      }
+   }
+}
+
+float readFloat()
+{
+  float_bytes payload;
+  
+  while(!Serial.available());
+ 
+  for(int i = 0; i < FLOAT_SIZE; i++)
+  {
+    payload.b[i] = Serial.read();
+    //delay(5);
+  }
+  
+  return payload.f;
+}
+////////////////////////////////////////
+//bouge les servos!!!!!
+void moveCamera(){
+
+}
+
+////////////////////////////////////////
 void setup()  
 {
   Wire.begin();
@@ -37,7 +97,7 @@ void setup()
   Serial.begin(9600);
   while(Serial.available()) // flush
     Serial.read();
-  Serial.println("Debut!");
+  Serial.println("Debut! And looking for A!");
   
   //char received;
   while(true)
@@ -63,6 +123,12 @@ void setup()
 
 void loop() // run over and over
 {
+  readData();
+  updateData();
+  moveCamera();
+  
+  
+  /*
   Serial.println("Recieved 1");
   receive_pressure = readFloat();
   Serial.print("recieve_pressure : ");
@@ -75,8 +141,9 @@ void loop() // run over and over
   Serial.println(diff_pressure);
   
   myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
+  */
   
-  delay(30);
+  delay(100);
 }
 
 int parse_MinMax(int val, int mini, int maxi)
@@ -84,17 +151,4 @@ int parse_MinMax(int val, int mini, int maxi)
   return (val > maxi) ? maxi : (val < mini) ? mini : val;
 }
 
-float readFloat()
-{
-  float_bytes payload;
-  
-  while(!Serial.available());
- 
-  for(int i = 0; i < FLOAT_SIZE; i++)
-  {
-    payload.b[i] = Serial.read();
-    delay(5);
-  }
-  
-  return payload.f;
-}
+
