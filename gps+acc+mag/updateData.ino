@@ -17,9 +17,7 @@ SoftwareSerial ss(RXPin, TXPin);
 TinyGPSPlus gps;
 
 /* Assign a unique ID to the sensors */
-// Adafruit_9DOF                dof   = Adafruit_9DOF();
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
-Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
 Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 
 
@@ -27,20 +25,16 @@ void setup()
 {
   Serial.begin(ConsoleBaud);
 
-  /* Enable auto-gain (from example) */
-  // mag.enableAutoRange(true);
-
   /* Initialise the sensor */
-  if(!accel.begin() || !mag.begin())
+  if(!accel.begin())
   {
-    /* There was a problem detecting the ADXL345 ... check your connections */
     Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
     while(1);
   }
   Serial.println("Acc Start");
+
   if(!gyro.begin())
   {
-    /* There was a problem detecting the L3GD20 ... check your connections */
     Serial.print("Ooops, no L3GD20 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
