@@ -2,22 +2,13 @@
 #include <Wire.h>
 #include "MPL3115A2.h"
 #include <math.h>
+#include "global.h"
 
 #define FLOAT_SIZE sizeof(float)
 #define START_SIGNAL 's'
 #define END_SIGNAL 'e'
 
 MPL3115A2 myPressure;
-
-///////////////////////////////////////
-//Les données
-union float_bytes
-{
-  float f;
-  uint8_t b[FLOAT_SIZE];
-};
-
-float_bytes data[4];
 
 ///////////////////////////////////////
 //mettre à jour les donnée

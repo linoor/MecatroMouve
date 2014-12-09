@@ -3,6 +3,7 @@
 #include <Servo.h>
 #include "MPL3115A2.h"
 #include <math.h>
+#include "global.h"
 
 #define DISTANCE 3 // en mètres
 #define FLOAT_SIZE sizeof(float)
@@ -10,16 +11,6 @@
 #define END_SIGNAL 'e'
 #define RECEIVE_SIZE 4
 #define LOCAL_SIZE 12
-
-///////////////////////////////////////
-//Les données reçus
-float dataReceived[RECEIVE_SIZE];
-
-union float_bytes
-{
-  float f;
-  uint8_t b[FLOAT_SIZE];
-};
 
 ////////////////////////////////////////
 //les données de CET Arduino
