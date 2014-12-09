@@ -18,6 +18,7 @@ TinyGPSPlus gps;
 
 /* Assign a unique ID to the sensors */
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
+Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
 Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 
 
@@ -48,13 +49,13 @@ void setup()
 
 void loop()
 {
-  float accGyro[6];
-  getAccAndMag(accGyro);
+  float accMagGyro[9];
+  getAccAndMag(accMagGyro);
   float pos[2];
   getGPSPosition(pos);
 
-  for (int i = 0; i < 6; i++) {
-    Serial.print(accGyro[i]);
+  for (int i = 0; i < 9; i++) {
+    Serial.print(accMagGyro[i]);
     Serial.print(',');
   }
   Serial.println();
@@ -68,20 +69,25 @@ void loop()
   delay(200);
 }
 
-void getAccAndMag(float* accGyro)
+void getAccAndMag(float* accMagGyro)
 {
   sensors_event_t eventAcc;
+  sensors_event_t eventMag;
   sensors_event_t eventGyro;
 
   accel.getEvent(&eventAcc);
+  mag.getEvent(&eventMag);
   gyro.getEvent(&eventGyro);
 
-  accGyro[0] = eventAcc.acceleration.x;
-  accGyro[1] = eventAcc.acceleration.y;
-  accGyro[2] = eventAcc.acceleration.z;
-  accGyro[3] = eventGyro.gyro.x;
-  accGyro[4] = eventGyro.gyro.y;
-  accGyro[5] = eventGyro.gyro.z;
+  accMagGyro[0] = eventAcc.acceleration.x;
+  accMagGyro[1] = eventAcc.acceleration.y;
+  accMagGyro[2] = eventAcc.acceleration.z;
+  accMagGyro[3] = eventMag.magnetic.x;
+  accMagGyro[4] = eventMag.magnetic.y;
+  accMagGyro[5] = eventMag.magnetic.z;
+  accMagGyro[6] = eventGyro.gyro.x;
+  accMagGyro[7] = eventGyro.gyro.y;
+  accMagGyro[8] = eventGyro.gyro.z;
 }
 
 void getGPSPosition(float* pos)
@@ -105,8 +111,4 @@ void getGPSPosition(float* pos)
     pos[0] = gps.location.lat();
     pos[1] = gps.location.lng();
   }
-
 }
-
-
-
