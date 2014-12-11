@@ -2,13 +2,22 @@
 #include <Wire.h>
 #include "MPL3115A2.h"
 #include <math.h>
-#include "global.h"
 
 #define FLOAT_SIZE sizeof(float)
 #define START_SIGNAL 's'
 #define END_SIGNAL 'e'
 
 MPL3115A2 myPressure;
+
+///////////////////////////////////////
+//Les données
+union float_bytes
+{
+  float f;
+  uint8_t b[FLOAT_SIZE];
+};
+
+float_bytes data[4];
 
 ///////////////////////////////////////
 //mettre à jour les donnée
@@ -61,8 +70,7 @@ void setup()
   myPressure.enableEventFlags();
   
   Serial.begin(9600);
-  while(Serial.available()) // flush
-    Serial.read();
+  flush();
   Serial.println("Debut!");
   
   while(true)
@@ -72,17 +80,16 @@ void setup()
     if(Serial.available())
     {
       if(Serial.read() == 'B')
+        Serial.println("Freedom!");
         break;
     }
   }
   
-  while(Serial.available()) // flush
-    Serial.read();
+  flush();
     
   delay(500);
   
-  while(Serial.available()) // flush
-    Serial.read();
+  flush();
 }
 
 void loop()
@@ -92,4 +99,8 @@ void loop()
   delay(200);
 }
 
-
+public void flush() {
+  while(Serial.available()) {
+    Serial.read();
+  }
+}
