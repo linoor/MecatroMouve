@@ -18,6 +18,8 @@
 #define GPSTXPin 11
 #define GPSBaud 9600
 
+// #define DEBUG
+
 MPL3115A2 myPressure;
 
 SoftwareSerial ss(GPSRXPin, GPSTXPin);
@@ -114,13 +116,22 @@ void updateData()
 
     data[0].f = myPressure.readAltitude();
     data[1].f = gpsPosition[0]; // Latitude
-    data[2].f = gpsPosition[1]; // Longtitude
-    data[3].f = accMagGyro[0];  // Acc x
+    data[2].f = gpsPosition[1]; // Longitude
+    data[3].f = 3.141592654;  // Acc x
     data[4].f = accMagGyro[1];  // Acc y
     data[5].f = accMagGyro[2];  // Acc z
     data[6].f = accMagGyro[6];  // Gyro x
     data[7].f = accMagGyro[7];  // Gyro y
     data[8].f = accMagGyro[8];  // Gyro z
+
+// #ifdef DEBUG
+    // Serial.println();
+    // for (int i = 0; i < SEND_SIZE; i++) {
+    //     Serial.print(data[i].f);
+    // }
+    // Serial.println();
+// #endif
+    // delay(100);
 }
 
 ///////////////////////////////////////
@@ -194,7 +205,7 @@ void setup()
     setupGPS();
     setupAccMagGyro();
 
-    Serial.begin(9600);
+    Serial.begin(57600);
     flush();
     Serial.println("Setup started!");
 
@@ -209,5 +220,5 @@ void loop()
 {
     updateData();
     sendData();
-    delay(5000);
+    delay(250);
 }
