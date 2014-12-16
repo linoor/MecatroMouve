@@ -105,19 +105,17 @@ void readData()
         // Wait for START_SIGNAL
         while (Serial.read() != START_SIGNAL)
         {
-            Serial.println("START_SIGNAL not received...");
+            // Serial.println("START_SIGNAL not received...");
         }
         Serial.println("START_SIGNAL success!!");
-        delay(50);
+        delay(100);
 
         // Receiving RECEIVE_SIZE floats
         float temp[RECEIVE_SIZE];
         for (int i = 0 ; i < RECEIVE_SIZE ; i++)
         {
             temp[i] = readFloat();
-            // delay(10);
         }
-        delay(50);
 
         // Wait for END_SIGNAL
         if (Serial.read() != END_SIGNAL)
@@ -127,7 +125,7 @@ void readData()
         }
         else
         {
-            Serial.println("END_SIGNAL success!!");
+            // Serial.println("END_SIGNAL success!!");
             for (int i = 0 ; i < RECEIVE_SIZE ; i++)
             {
                 dataReceived[i] = temp[i];
@@ -175,7 +173,7 @@ void setup()
     setupBaro();
     setupServo();
 
-    Serial.begin(9600);
+    Serial.begin(57600);
     flush();
 
     testConnection();
@@ -205,7 +203,7 @@ void loop() // run over and over
     myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
 
-    delay(200);
+    delay(50);
 }
 
 int parse_MinMax(int val, int mini, int maxi)
