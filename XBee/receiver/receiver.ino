@@ -212,7 +212,7 @@ void updateData()
     dataCurrent[10] = accMagGyro[7];
     dataCurrent[11] = accMagGyro[8];
 
-    printDataCurrent();
+    // printDataCurrent();
 }
 
 ////////////////////////////////////////
@@ -245,10 +245,6 @@ void readData()
         {
             temp[i] = readFloat();
         }
-<<<<<<< HEAD
-=======
-        // delay(50);
->>>>>>> bearing
 
         // Wait for END_SIGNAL
         if (Serial.read() != END_SIGNAL)
@@ -336,7 +332,7 @@ void setup()
 void loop() // run over and over
 {
     updateData();
-    // readData();
+    readData();
     moveCamera();
 
     // testSensors();
@@ -391,9 +387,9 @@ float computeBearing() {
     latiA = dataReceived[2];
     altiA = dataReceived[0];
 
-    longB = 0;
-    latiB = 0;
-    altiB = 0;
+    longB = dataCurrent[1];
+    latiA = dataCurrent[2];
+    altiA = dataCurrent[0];
 
     //*** using haversine formula to solve for distance ****
     float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
