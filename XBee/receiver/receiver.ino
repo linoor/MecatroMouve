@@ -59,6 +59,7 @@ void testConnection()
         if (Serial.available())
         {
             if (Serial.read() == 'A')
+
             {
                 for (int i = 0; i < 10; i++)
                 {
@@ -209,4 +210,44 @@ void loop() // run over and over
 int parse_MinMax(int val, int mini, int maxi)
 {
     return (val > maxi) ? maxi : (val < mini) ? mini : val;
+}
+
+//**********************************
+//Données requise:
+//
+//longA, latiA, altiA
+//longB, latiB, altiA
+//
+//A est le recepteur, B le sportif
+//**********************************
+
+#define R 6371000
+
+//Everything in rad
+//Everything in meters
+
+/* A is the receiver */
+
+int distance;
+float angleVertical;
+float bearing;
+
+float computeBearing() {
+    float longA, latiA, altiA;
+    float longB, latiB, altiB;
+
+    longA = dataReceived[1];
+    latiA = dataReceived[2];
+    altiA = dataReceived[0];
+
+    longB = 0;
+    latiB = 0;
+    altiB = 0;
+
+    //*** using haversine formula to solve for distance ****
+    float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
+
+    distance = (int)(R*acos(1 - RHS));
+    angleVertical = atan((altiB-altiA)/distance);
+    bearing = atan2(sin(longB-longA)*cos(latiB), cos(latiA)*sin(latiB) - cos(longB-longA)*sin(latiA)*cos(latiB));
 }
