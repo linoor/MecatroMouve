@@ -18,6 +18,8 @@
 #define GPSTXPin 11
 #define GPSBaud 9600
 
+// #define DEBUG
+
 MPL3115A2 myPressure;
 
 SoftwareSerial ss(GPSRXPin, GPSTXPin);
@@ -47,7 +49,7 @@ void setupBaro()
     myPressure.begin();
 
     myPressure.setModeAltimeter();
-    myPressure.setOversampleRate(7); // Pour lire 1 seule valeur, il lui faut 512ms
+    myPressure.setOversampleRate(5); // Pour lire 1 seule valeur, il lui faut 512ms
     // Du coup pas besoin de moyenner quoique ce soit!
     myPressure.enableEventFlags();
 }
@@ -114,13 +116,26 @@ void updateData()
 
     data[0].f = myPressure.readAltitude();
     data[1].f = gpsPosition[0]; // Latitude
-    data[2].f = gpsPosition[1]; // Longtitude
-    data[3].f = accMagGyro[0];  // Acc x
-    data[4].f = accMagGyro[1];  // Acc y
-    data[5].f = accMagGyro[2];  // Acc z
-    data[6].f = accMagGyro[6];  // Gyro x
-    data[7].f = accMagGyro[7];  // Gyro y
-    data[8].f = accMagGyro[8];  // Gyro z
+    data[2].f = gpsPosition[1]; // Longitude
+    data[3].f = 0;  // Acc x
+    data[4].f = 0;  // Acc y
+    data[5].f = 0;  // Acc z
+    data[6].f = 0;  // Gyro x
+    data[7].f = 0;  // Gyro y
+    data[8].f = 0;  // Gyro z
+
+    Serial.println(myPressure.readAltitude());
+    Serial.println(gpsPosition[0]);
+    Serial.println(gpsPosition[1]);
+
+// #ifdef DEBUG
+    // Serial.println();
+    // for (int i = 0; i < SEND_SIZE; i++) {
+    //     Serial.print(data[i].f);
+    // }
+    // Serial.println();
+// #endif
+    // delay(100);
 }
 
 ///////////////////////////////////////
@@ -194,11 +209,11 @@ void setup()
     setupGPS();
     setupAccMagGyro();
 
-    Serial.begin(9600);
+    Serial.begin(57600);
     flush();
     Serial.println("Setup started!");
 
-    testConnection();
+    // testConnection();
 
     flush();
     delay(500);
@@ -208,6 +223,6 @@ void setup()
 void loop()
 {
     updateData();
-    sendData();
-    delay(5000);
+    // sendData();
+    delay(250);
 }
