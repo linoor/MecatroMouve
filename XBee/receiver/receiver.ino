@@ -321,7 +321,7 @@ void setup()
     setupAccMagGyro();
     setupServo();
 
-    Serial.begin(9600);
+    Serial.begin(57600);
     flush();
 
     // testConnection();
