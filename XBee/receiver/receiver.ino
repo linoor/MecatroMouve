@@ -101,6 +101,7 @@ void testConnection()
         if (Serial.available())
         {
             if (Serial.read() == 'A')
+
             {
                 for (int i = 0; i < 10; i++)
                 {
@@ -233,19 +234,21 @@ void readData()
         // Wait for START_SIGNAL
         while (Serial.read() != START_SIGNAL)
         {
-            Serial.println("START_SIGNAL not received...");
+            // Serial.println("START_SIGNAL not received...");
         }
         Serial.println("START_SIGNAL success!!");
-        delay(50);
+        delay(100);
 
         // Receiving RECEIVE_SIZE floats
         float temp[RECEIVE_SIZE];
         for (int i = 0 ; i < RECEIVE_SIZE ; i++)
         {
             temp[i] = readFloat();
-            // delay(10);
         }
+<<<<<<< HEAD
+=======
         // delay(50);
+>>>>>>> bearing
 
         // Wait for END_SIGNAL
         if (Serial.read() != END_SIGNAL)
@@ -255,7 +258,7 @@ void readData()
         }
         else
         {
-            Serial.println("END_SIGNAL success!!");
+            // Serial.println("END_SIGNAL success!!");
             for (int i = 0 ; i < RECEIVE_SIZE ; i++)
             {
                 dataReceived[i] = temp[i];
@@ -321,7 +324,7 @@ void setup()
     setupAccMagGyro();
     setupServo();
 
-    Serial.begin(9600);
+    Serial.begin(57600);
     flush();
 
     // testConnection();
@@ -352,11 +355,50 @@ void loop() // run over and over
 
     myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
-
     delay(100);
 }
 
 int parse_MinMax(int val, int mini, int maxi)
 {
     return (val > maxi) ? maxi : (val < mini) ? mini : val;
+}
+
+//**********************************
+//Données requise:
+//
+//longA, latiA, altiA
+//longB, latiB, altiA
+//
+//A est le recepteur, B le sportif
+//**********************************
+
+#define R 6371000
+
+//Everything in rad
+//Everything in meters
+
+/* A is the receiver */
+
+int distance;
+float angleVertical;
+float bearing;
+
+float computeBearing() {
+    float longA, latiA, altiA;
+    float longB, latiB, altiB;
+
+    longA = dataReceived[1];
+    latiA = dataReceived[2];
+    altiA = dataReceived[0];
+
+    longB = 0;
+    latiB = 0;
+    altiB = 0;
+
+    //*** using haversine formula to solve for distance ****
+    float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
+
+    distance = (int)(R*acos(1 - RHS));
+    angleVertical = atan((altiB-altiA)/distance);
+    bearing = atan2(sin(longB-longA)*cos(latiB), cos(latiA)*sin(latiB) - cos(longB-longA)*sin(latiA)*cos(latiB));
 }
