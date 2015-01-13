@@ -112,7 +112,7 @@ void updateData()
     float accMagGyro[9];
 
     getGPSPosition(gpsPosition);
-    getAccMagGyro(accMagGyro);
+    // getAccMagGyro(accMagGyro);
 
     data[0].f = myPressure.readAltitude();
     data[1].f = gpsPosition[0]; // Latitude
@@ -124,9 +124,9 @@ void updateData()
     data[7].f = 0;  // Gyro y
     data[8].f = 0;  // Gyro z
 
-    Serial.println(myPressure.readAltitude());
-    Serial.println(gpsPosition[0]);
-    Serial.println(gpsPosition[1]);
+    // Serial.println(myPressure.readAltitude());
+    // Serial.println(gpsPosition[0]);
+    // Serial.println(gpsPosition[1]);
 
 // #ifdef DEBUG
     // Serial.println();
@@ -207,13 +207,13 @@ void setup()
 
     setupBaro();
     setupGPS();
-    setupAccMagGyro();
+    // setupAccMagGyro();
 
     Serial.begin(57600);
     flush();
     Serial.println("Setup started!");
 
-    // testConnection();
+    testConnection();
 
     flush();
     delay(500);
@@ -223,6 +223,6 @@ void setup()
 void loop()
 {
     updateData();
-    // sendData();
+    sendData();
     delay(250);
 }

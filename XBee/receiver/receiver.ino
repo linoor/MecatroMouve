@@ -191,7 +191,7 @@ void getAccMagGyro(float *accMagGyro)
 //mettre à jour les donnée de CET arduino
 void updateData()
 {
-    Serial.print(myPressure.readAltitude());
+    // Serial.print(myPressure.readAltitude());
 
     float gpsPosition[2];
     float accMagGyro[9];
@@ -323,7 +323,7 @@ void setup()
     Serial.begin(57600);
     flush();
 
-    // testConnection();
+    testConnection();
 
     flush();
     delay(200);
