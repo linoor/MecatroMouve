@@ -20,6 +20,9 @@
 #define GPSTXPin 9
 #define GPSBaud 9600
 
+#define R 6371000
+
+#define DEBUG
 
 union float_bytes
 {
@@ -47,6 +50,16 @@ Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 Servo myservoVertical, myservoHorizontal;
 float receive_pressure, mesure_pressure, diff_pressure;
 
+
+//Everything in rad
+//Everything in meters
+
+/* A is the receiver */
+int angleTest = 0;
+int distance;
+float angleVertical;
+float bearing;
+const float Pi = 3.14159;
 
 ////////// setting things up //////////
 
@@ -86,10 +99,10 @@ void setupAccMagGyro()
 
 void setupServo()
 {
-    // myservoVertical.attach(10); // Attach servos
-    // myservoHorizontal.attach(11);
-    // myservoVertical.write(90);
-    // myservoHorizontal.write(0);
+    myservoVertical.attach(10, 500, 2400); // Attach servos
+    myservoHorizontal.attach(11, 500, 2400);
+    myservoVertical.write(0);
+    myservoHorizontal.write(0);
 }
 
 void testConnection()
@@ -144,6 +157,10 @@ void getGPSPosition(float *pos)
         pos[0] = gps.location.lat();
         pos[1] = gps.location.lng();
     }
+    else {
+        pos[0] = -1;
+        pos[1] = -1;
+    }
 }
 
 void getAccMagGyro(float *accMagGyro)
@@ -167,28 +184,26 @@ void getAccMagGyro(float *accMagGyro)
     accMagGyro[8] = eventGyro.gyro.z;
 }
 
-// void testSensors()
-// {
-//     Serial.println(myPressure.readAltitude());
-
-//     float myGPSPosition[2];
-//     getGPSPosition(myGPSPosition);
-//     Serial.print(myGPSPosition[0]);
-//     Serial.print(",");
-//     Serial.print(myGPSPosition[1]);
-//     Serial.println();
-
-//     float accMagGyro[9];
-//     getAccMagGyro(accMagGyro);
-//     for(int i = 0; i < 9; i++) {
-//         Serial.print(accMagGyro[i]);
-//         Serial.print(",");
-//     }
-//     Serial.println();
-// }
 
 ////////////////////////////////////////
 //mettre à jour les donnée de CET arduino
+
+void printDataCurrent()
+{
+    Serial.print("Altitude (Baro) : "); Serial.println(dataCurrent[0]);
+    Serial.print("Longitude (GPS) : "); Serial.println(dataCurrent[1]);
+    Serial.print("Latitude  (GPS) : "); Serial.println(dataCurrent[2]);
+    Serial.print("Acc  x   (9DoG) : "); Serial.println(dataCurrent[3]);
+    Serial.print("Acc  y   (9DoG) : "); Serial.println(dataCurrent[4]);
+    Serial.print("Acc  z   (9DoG) : "); Serial.println(dataCurrent[5]);
+    Serial.print("Mag  x   (9DoG) : "); Serial.println(dataCurrent[6]);
+    Serial.print("Mag  y   (9DoG) : "); Serial.println(dataCurrent[7]);
+    Serial.print("Mag  z   (9DoG) : "); Serial.println(dataCurrent[8]);
+    Serial.print("Gyro x   (9DoG) : "); Serial.println(dataCurrent[9]);
+    Serial.print("Gyro y   (9DoG) : "); Serial.println(dataCurrent[10]);
+    Serial.print("Gyro z   (9DoG) : "); Serial.println(dataCurrent[11]);
+}
+
 void updateData()
 {
     // Serial.print(myPressure.readAltitude());
@@ -212,17 +227,72 @@ void updateData()
     dataCurrent[10] = accMagGyro[7];
     dataCurrent[11] = accMagGyro[8];
 
-    // printDataCurrent();
+    printDataCurrent();
 }
 
 ////////////////////////////////////////
 //bouge les servos!!!!!
 void moveCamera()
 {
+    float longA, latiA, altiA;
+    float longB, latiB, altiB;
+
+    // longA = dataReceived[1];
+    // latiA = dataReceived[2];
+    // altiA = dataReceived[0];
+
+    // longB = dataCurrent[1];
+    // latiB = dataCurrent[2];
+    // altiB = dataCurrent[0];
+    longA = 0;
+    latiA = 0;
+    altiA = 0;
+
+    // hard-coded version
+    angleTest += 30;
+    longB = cos(angleTest);
+    latiB = sin(angleTest);
+    altiB = 5;
+    distance = 5;
+
+    //*** using haversine formula to solve for distance ****
+    float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
+
+    // distance = (int)(R*acos(1 - RHS));
+    angleVertical = atan((altiB-altiA)/distance);
+    bearing = atan2(sin(longB-longA)*cos(latiB), cos(latiA)*sin(latiB) - cos(longB-longA)*sin(latiA)*cos(latiB));
+
+    float servoVert = 90 - angleVertical/Pi*180;
+    float servoHoriz = bearing/Pi*180;
+    myservoVertical.write(servoVert);
+    myservoHorizontal.write(servoHoriz);
+
+#ifdef DEBUG
+    Serial.print("Distance: "); Serial.println(distance);
+    Serial.print("Vertical: "); Serial.println(servoVert);
+    Serial.print("Horizontal: "); Serial.println(servoHoriz);
+    Serial.println();
+#endif
 }
 
 ////////////////////////////////////////
 //recevoir les données
+
+float readFloat()
+{
+    float_bytes payload;
+
+    while (!Serial.available());
+
+    for (int i = 0; i < FLOAT_SIZE; i++)
+    {
+        payload.b[i] = Serial.read();
+        // delay(5);
+    }
+
+    return payload.f;
+}
+
 void readData()
 {
     if (!Serial.available())
@@ -259,26 +329,12 @@ void readData()
             {
                 dataReceived[i] = temp[i];
             }
-            printDataReceived();
+            // printDataReceived();
         }
         Serial.println();
     }
 }
 
-float readFloat()
-{
-    float_bytes payload;
-
-    while (!Serial.available());
-
-    for (int i = 0; i < FLOAT_SIZE; i++)
-    {
-        payload.b[i] = Serial.read();
-        // delay(5);
-    }
-
-    return payload.f;
-}
 
 void printDataReceived()
 {
@@ -293,21 +349,6 @@ void printDataReceived()
     Serial.print("Gyro z   (9DoG) : "); Serial.println(dataReceived[8]);
 }
 
-void printDataCurrent()
-{
-    Serial.print("Altitude (Baro) : "); Serial.println(dataCurrent[0]);
-    Serial.print("Longitude (GPS) : "); Serial.println(dataCurrent[1]);
-    Serial.print("Latitude  (GPS) : "); Serial.println(dataCurrent[2]);
-    Serial.print("Acc  x   (9DoG) : "); Serial.println(dataCurrent[3]);
-    Serial.print("Acc  y   (9DoG) : "); Serial.println(dataCurrent[4]);
-    Serial.print("Acc  z   (9DoG) : "); Serial.println(dataCurrent[5]);
-    Serial.print("Mag  x   (9DoG) : "); Serial.println(dataCurrent[6]);
-    Serial.print("Mag  y   (9DoG) : "); Serial.println(dataCurrent[7]);
-    Serial.print("Mag  z   (9DoG) : "); Serial.println(dataCurrent[8]);
-    Serial.print("Gyro x   (9DoG) : "); Serial.println(dataCurrent[9]);
-    Serial.print("Gyro y   (9DoG) : "); Serial.println(dataCurrent[10]);
-    Serial.print("Gyro z   (9DoG) : "); Serial.println(dataCurrent[11]);
-}
 
 ////////////////////////////////////////
 
@@ -323,35 +364,23 @@ void setup()
     Serial.begin(57600);
     flush();
 
-    testConnection();
+    // testConnection();
 
     flush();
-    delay(200);
+    delay(2000);
 }
 
 void loop() // run over and over
 {
     updateData();
-    readData();
+    // readData();
     moveCamera();
 
-    // testSensors();
 
-    /*
-    Serial.println("Recieved 1");
-    receive_pressure = readFloat();
-    Serial.print("recieve_pressure : ");
-    Serial.println(receive_pressure);
-    mesure_pressure = myPressure.readAltitude(0x60);
-    Serial.print("mesure_pressure : ");
-    Serial.println(mesure_pressure);
-    diff_pressure = receive_pressure - mesure_pressure;
-    Serial.print("diff_pressure : ");
-    Serial.println(diff_pressure);
 
-    myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
+    /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
-    delay(100);
+    delay(1000);
 }
 
 int parse_MinMax(int val, int mini, int maxi)
@@ -368,33 +397,33 @@ int parse_MinMax(int val, int mini, int maxi)
 //A est le recepteur, B le sportif
 //**********************************
 
-#define R 6371000
+// #define R 6371000
 
-//Everything in rad
-//Everything in meters
+// //Everything in rad
+// //Everything in meters
 
-/* A is the receiver */
+// /* A is the receiver */
 
-int distance;
-float angleVertical;
-float bearing;
+// int distance;
+// float angleVertical;
+// float bearing;
 
-float computeBearing() {
-    float longA, latiA, altiA;
-    float longB, latiB, altiB;
+// float computeBearing() {
+//     float longA, latiA, altiA;
+//     float longB, latiB, altiB;
 
-    longA = dataReceived[1];
-    latiA = dataReceived[2];
-    altiA = dataReceived[0];
+//     longA = dataReceived[1];
+//     latiA = dataReceived[2];
+//     altiA = dataReceived[0];
 
-    longB = dataCurrent[1];
-    latiA = dataCurrent[2];
-    altiA = dataCurrent[0];
+//     longB = dataCurrent[1];
+//     latiB = dataCurrent[2];
+//     altiB = dataCurrent[0];
 
-    //*** using haversine formula to solve for distance ****
-    float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
+//     //*** using haversine formula to solve for distance ****
+//     float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
 
-    distance = (int)(R*acos(1 - RHS));
-    angleVertical = atan((altiB-altiA)/distance);
-    bearing = atan2(sin(longB-longA)*cos(latiB), cos(latiA)*sin(latiB) - cos(longB-longA)*sin(latiA)*cos(latiB));
-}
+//     distance = (int)(R*acos(1 - RHS));
+//     angleVertical = atan((altiB-altiA)/distance);
+//     bearing = atan2(sin(longB-longA)*cos(latiB), cos(latiA)*sin(latiB) - cos(longB-longA)*sin(latiA)*cos(latiB));
+// }
