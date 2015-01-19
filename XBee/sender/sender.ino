@@ -83,10 +83,13 @@ void testConnection() {
     {
         Serial.print("A");
         delay(50);
-        if (Serial.available())
+
+        while (Serial.available())
         {
+            // Serial.println("Available");
             if (Serial.read() == 'B')
             {
+                // Serial.println("Read B");
                 Serial.println("Setup finished!");
                 return;
             }
