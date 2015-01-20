@@ -211,8 +211,12 @@ void updateData()
     float gpsPosition[2];
     float accMagGyro[9];
 
+    for(int i = 0; i < 9; i ++){
+        accMagGyro[i] = 0;
+    }
+
     getGPSPosition(gpsPosition);
-    getAccMagGyro(accMagGyro);
+    // getAccMagGyro(accMagGyro);
 
     dataCurrent[0] = myPressure.readAltitude();
     dataCurrent[1] = gpsPosition[0];
@@ -371,7 +375,7 @@ void setup()
 
     setupBaro();
     setupGPS();
-    setupAccMagGyro();
+    // setupAccMagGyro();
     setupServo();
 
     Serial.begin(57600);
@@ -389,11 +393,9 @@ void loop() // run over and over
     readData();
     moveCamera();
 
-
-
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
-    delay(1000);
+    delay(300);
 }
 
 int parse_MinMax(int val, int mini, int maxi)
