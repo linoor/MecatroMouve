@@ -232,28 +232,40 @@ void updateData()
 
 ////////////////////////////////////////
 //bouge les servos!!!!!
+//**********************************
+// Données requise:
+//
+// longA, latiA, altiA
+// longB, latiB, altiA
+//
+// A est le recepteur, B le sportif
+//**********************************
+// Everything in rad
+// Everything in meters
+
 void moveCamera()
 {
     float longA, latiA, altiA;
     float longB, latiB, altiB;
 
-    // longA = dataReceived[1];
-    // latiA = dataReceived[2];
-    // altiA = dataReceived[0];
-
-    // longB = dataCurrent[1];
-    // latiB = dataCurrent[2];
-    // altiB = dataCurrent[0];
+    // hard-coded version
     longA = 0;
     latiA = 0;
     altiA = 0;
+    // angleTest += 30;
+    // longB = cos(angleTest);
+    // latiB = sin(angleTest);
+    longB = 0;
+    latiB = 0.002;
+    // distance = 5;
 
-    // hard-coded version
-    angleTest += 30;
-    longB = cos(angleTest);
-    latiB = sin(angleTest);
-    altiB = 5;
-    distance = 5;
+    // longA = dataReceived[1];
+    // latiA = dataReceived[2];
+    altiA = dataCurrent[0];
+
+    // longB = dataCurrent[1];
+    // latiB = dataCurrent[2];
+    altiB = dataReceived[0];
 
     //*** using haversine formula to solve for distance ****
     float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
@@ -268,7 +280,8 @@ void moveCamera()
     myservoHorizontal.write(servoHoriz);
 
 #ifdef DEBUG
-    Serial.print("Distance: "); Serial.println(distance);
+    Serial.print("Alti A: "); Serial.println(altiA);
+    Serial.print("Alti B: "); Serial.println(altiB);
     Serial.print("Vertical: "); Serial.println(servoVert);
     Serial.print("Horizontal: "); Serial.println(servoHoriz);
     Serial.println();
@@ -364,7 +377,7 @@ void setup()
     Serial.begin(57600);
     flush();
 
-    // testConnection();
+    testConnection();
 
     flush();
     delay(2000);
@@ -373,7 +386,7 @@ void setup()
 void loop() // run over and over
 {
     updateData();
-    // readData();
+    readData();
     moveCamera();
 
 
