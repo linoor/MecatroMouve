@@ -45,7 +45,7 @@ Note:
 ### Communication Process
 #### XBee Handshaking
 ###### Example
-* In `sender.ino`:
+* In `sender.ino`:  
 ``while (true)
 {
     // Start connecting...
@@ -61,7 +61,7 @@ Note:
     }
 }``
 
-* In `receiver.ino`:
+* In `receiver.ino`:  
 ``while (true)
 {
     delay(10);
