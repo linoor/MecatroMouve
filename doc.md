@@ -35,15 +35,53 @@ Note:
 1. Get scripts of *sender* and *receiver* from [here](https://github.com/linoor/MecatroMouve/tree/master) (each in `XBee/sender`,  `XBee/receiver`)
 2. Download and import required libraries
 3. Set `GPSRXPin` `GPSTXPin` values according to circuit (`GPSRXPin` connects the ***TX*** pin of GPS, and vice versa)
-4. Set ports for Servos as first parameters in  
+4. Set ports for Servos as first parameters in
   `myservoVertical.attach(PORT_V, 500, 2400)` `myservoHorizontal.attach(PORT_H, 500, 2400)`
-5. Upload script to Arduino board  
+5. Upload script to Arduino board
   ***Remember to turn jumpers of XBee shields into USB mode*** *[ref](http://electronics.stackexchange.com/questions/25574/xbee-shield-turning-jumper-settings-into-on-off-xbee-usb-manual-switch)*
-6. Configure baudrate to 57600 for Serial Monitor
+6. Configure baudrate to `57600` for Serial Monitor
 
 ## Explanation
 ### Communication Process
 #### XBee Handshaking
+###### Example
+* In `sender.ino`:
+``while (true)
+    {
+        Serial.print("A");
+        delay(50);
+
+        while (Serial.available())
+        {
+            // Serial.println("Available");
+            if (Serial.read() == 'B')
+            {
+                // Serial.println("Read B");
+                Serial.println("Setup finished!");
+                return;
+            }
+        }
+    }
+``
+* In `receiver.ino`:
+``
+while (true)
+    {
+        delay(10);
+        if (Serial.available())
+        {
+            if (Serial.read() == 'A')
+
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Serial.print("B");
+                }
+                return;
+            }
+        }
+    }
+``
 
 #### Sending Data
 
