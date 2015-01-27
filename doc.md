@@ -47,41 +47,36 @@ Note:
 ###### Example
 * In `sender.ino`:
 ``while (true)
+{
+    // Start connecting...
+    Serial.print("A");
+    delay(50);
+    while (Serial.available())
     {
-        Serial.print("A");
-        delay(50);
-
-        while (Serial.available())
+        if (Serial.read() == 'B')
         {
-            // Serial.println("Available");
-            if (Serial.read() == 'B')
-            {
-                // Serial.println("Read B");
-                Serial.println("Setup finished!");
-                return;
-            }
+            // Setup finished!
+            return;
         }
     }
-``
+}``
+
 * In `receiver.ino`:
-``
-while (true)
+``while (true)
+{
+    delay(10);
+    if (Serial.available())
     {
-        delay(10);
-        if (Serial.available())
+        if (Serial.read() == 'A')
         {
-            if (Serial.read() == 'A')
-
+            for (int i = 0; i < 10; i++)
             {
-                for (int i = 0; i < 10; i++)
-                {
-                    Serial.print("B");
-                }
-                return;
+                Serial.print("B");
             }
+            return;
         }
     }
-``
+}``
 
 #### Sending Data
 
