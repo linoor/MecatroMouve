@@ -209,7 +209,6 @@ void printDataCurrent()
 void updateData()
 {
     // Serial.print(myPressure.readAltitude());
-
     float gpsPosition[2];
     float accMagGyro[9];
 
@@ -370,6 +369,13 @@ void printDataReceived()
 
 ////////////////////////////////////////
 
+void readTest() {
+    while (!Serial.available());
+    Serial.println(Serial.read());
+}
+
+////////////////////////////////////////
+
 void setup()
 {
     Wire.begin();
@@ -385,7 +391,7 @@ void setup()
     testConnection();
 
     flush();
-    delay(2000);
+    delay(500);
 }
 
 void loop() // run over and over
@@ -393,9 +399,10 @@ void loop() // run over and over
     // updateData();
     // readData();
     // moveCamera();
-
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
+
+    readTest();
     delay(300);
 }
 
