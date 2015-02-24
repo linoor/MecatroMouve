@@ -204,12 +204,22 @@ void getAccMagGyro(float *accMagGyro)
 
 //////////////////////////////////////////////
 
+void sendTest() {
+    float_bytes testData;
+    for (int i = 0; i < 1001; i++) {
+        testData.f = i;
+        Serial.write(testData.b, FLOAT_SIZE);
+    }
+}
+
+//////////////////////////////////////////////
+
 void setup()
 {
     Wire.begin();
 
     setupBaro();
-    setupGPS();
+    // setupGPS();
     // setupAccMagGyro();
 
     Serial.begin(57600);
@@ -225,7 +235,8 @@ void setup()
 
 void loop()
 {
-    updateData();
-    sendData();
-    delay(250);
+    // updateData();
+    // sendData();
+    sendTest();
+    delay(500);
 }

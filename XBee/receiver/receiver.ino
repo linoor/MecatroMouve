@@ -114,8 +114,9 @@ void testConnection()
         delay(10);
         if (Serial.available())
         {
-            if (Serial.read() == 'A')
-
+            char rec = Serial.read();
+            Serial.print(rec);
+            if (rec == 'A')
             {
                 for (int i = 0; i < 10; i++)
                 {
@@ -367,6 +368,9 @@ void printDataReceived()
     Serial.print("Gyro z   (9DoG) : "); Serial.println(dataReceived[8]);
 }
 
+////////////////////////////////////////
+
+
 
 ////////////////////////////////////////
 
@@ -375,9 +379,9 @@ void setup()
     Wire.begin();
 
     setupBaro();
-    setupGPS();
+    // setupGPS();
     // setupAccMagGyro();
-    setupServo();
+    // setupServo();
 
     Serial.begin(57600);
     flush();
@@ -390,12 +394,14 @@ void setup()
 
 void loop() // run over and over
 {
-    updateData();
-    readData();
-    moveCamera();
+    // updateData();
+    // readData();
+    // moveCamera();
 
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
+
+    readTest();
     delay(300);
 }
 
