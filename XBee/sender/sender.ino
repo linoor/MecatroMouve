@@ -49,11 +49,7 @@ void setupBaro()
     myPressure.begin();
 
     myPressure.setModeAltimeter();
-<<<<<<< HEAD
-    myPressure.setOversampleRate(6); // Pour lire 1 seule valeur, il lui faut 512ms
-=======
-    myPressure.setOversampleRate(4); // Pour lire 1 seule valeur, il lui faut 512ms
->>>>>>> bearing
+    myPressure.setOversampleRate(7); // Pour lire 1 seule valeur, il lui faut 512ms
     // Du coup pas besoin de moyenner quoique ce soit!
     myPressure.enableEventFlags();
 }
