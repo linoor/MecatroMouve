@@ -49,7 +49,7 @@ void setupBaro()
     myPressure.begin();
 
     myPressure.setModeAltimeter();
-    myPressure.setOversampleRate(7); // Pour lire 1 seule valeur, il lui faut 512ms
+    myPressure.setOversampleRate(6); // Pour lire 1 seule valeur, il lui faut 512ms
     // Du coup pas besoin de moyenner quoique ce soit!
     myPressure.enableEventFlags();
 }
@@ -200,12 +200,18 @@ void getAccMagGyro(float *accMagGyro)
 
 //////////////////////////////////////////////
 
+void testBaro() {
+    Serial.println(myPressure.readAltitude());
+}
+
+//////////////////////////////////////////////
+
 void setup()
 {
     Wire.begin();
 
     setupBaro();
-    setupGPS();
+    // setupGPS();
     // setupAccMagGyro();
 
     Serial.begin(57600);
@@ -221,7 +227,8 @@ void setup()
 
 void loop()
 {
-    updateData();
-    sendData();
+    testBaro();
+    // updateData();
+    // sendData();
     delay(250);
 }
