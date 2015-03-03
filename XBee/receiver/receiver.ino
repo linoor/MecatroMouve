@@ -30,6 +30,14 @@ union float_bytes
     uint8_t b[FLOAT_SIZE];
 };
 
+template <typename T>
+union bytes
+{
+    T f;
+    byte b[sizeof(T)];
+};
+
+
 ///////////////////////////////////////
 //Les données reçus
 float dataReceived[RECEIVE_SIZE];
@@ -374,6 +382,64 @@ void readTest() {
     Serial.println(Serial.read());
 }
 
+template <typename T>
+T readDataTest() {
+    bytes<T> received;
+    for (int i = 0; i < sizeof(T); i++)
+    {
+        received.b[i] = Serial.read();
+    }
+    return received.f;
+}
+
+void readBaroTest()
+{
+    if (!Serial.available()) return;
+
+    int counter = 0;
+    while (Serial.read() != START_SIGNAL)
+    {
+        if (50 < counter++)
+        {
+            Serial.println("START_SIGNAL not received...");
+            return;
+        }
+    }
+    delay(100);
+
+
+    float alti;
+    int32_t gpsPosition[2];
+
+    switch (Serial.read())
+    {
+        case 'b':
+            alti = readDataTest<float>();
+            break;
+        default:
+            break;
+    }
+
+
+    delay(100);
+    // Wait for END_SIGNAL
+    if (Serial.read() != END_SIGNAL)
+    {
+        Serial.println("END_SIGNAL not received... Truncate data...");
+    }
+    else
+    {
+        // for (int i = 0 ; i < RECEIVE_SIZE ; i++)
+        // {
+        //     dataReceived[i] = temp[i];
+        // }
+        // printDataReceived();
+        Serial.println(alti);
+    }
+    Serial.println();
+}
+
+
 ////////////////////////////////////////
 
 void setup()
@@ -402,7 +468,7 @@ void loop() // run over and over
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
 
-    // readTest();
+    readBaroTest();
     delay(300);
 }
 
@@ -411,42 +477,3 @@ int parse_MinMax(int val, int mini, int maxi)
     return (val > maxi) ? maxi : (val < mini) ? mini : val;
 }
 
-//**********************************
-//Données requise:
-//
-//longA, latiA, altiA
-//longB, latiB, altiA
-//
-//A est le recepteur, B le sportif
-//**********************************
-
-// #define R 6371000
-
-// //Everything in rad
-// //Everything in meters
-
-// /* A is the receiver */
-
-// int distance;
-// float angleVertical;
-// float bearing;
-
-// float computeBearing() {
-//     float longA, latiA, altiA;
-//     float longB, latiB, altiB;
-
-//     longA = dataReceived[1];
-//     latiA = dataReceived[2];
-//     altiA = dataReceived[0];
-
-//     longB = dataCurrent[1];
-//     latiB = dataCurrent[2];
-//     altiB = dataCurrent[0];
-
-//     //*** using haversine formula to solve for distance ****
-//     float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
-
-//     distance = (int)(R*acos(1 - RHS));
-//     angleVertical = atan((altiB-altiA)/distance);
-//     bearing = atan2(sin(longB-longA)*cos(latiB), cos(latiA)*sin(latiB) - cos(longB-longA)*sin(latiA)*cos(latiB));
-// }

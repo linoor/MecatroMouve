@@ -40,6 +40,13 @@ union float_bytes
     byte b[FLOAT_SIZE];
 };
 
+template <typename T>
+union bytes
+{
+    T f;
+    byte b[sizeof(T)];
+};
+
 float_bytes data[SEND_SIZE];
 
 ////////// setting things up //////////
@@ -49,7 +56,7 @@ void setupBaro()
     myPressure.begin();
 
     myPressure.setModeAltimeter();
-    myPressure.setOversampleRate(7); // Pour lire 1 seule valeur, il lui faut 512ms
+    myPressure.setOversampleRate(6); // Pour lire 1 seule valeur, il lui faut 512ms
     // Du coup pas besoin de moyenner quoique ce soit!
     myPressure.enableEventFlags();
 }
@@ -204,8 +211,6 @@ void getAccMagGyro(float *accMagGyro)
 
 //////////////////////////////////////////////
 // Debugging phase
-
-
 int8_t counter = 0;
 
 void sendTest() {
@@ -216,8 +221,26 @@ void sendTest() {
     // Serial.write(testData.b, FLOAT_SIZE);
 }
 
-void updateBaro() {
+template <typename T>
+void sendTestData(bytes<T> dataToSend[], int dataSize, String typeSignal)
+{
+    //signaler le début
+    Serial.print(START_SIGNAL);
+    Serial.print(typeSignal);
+    //envoyer de la merde
+    for (int i = 0; i < dataSize; i++)
+    {
+        Serial.write(dataToSend[i].b, sizeof(T));
+    }
+    //signaler la fin
+    Serial.print(END_SIGNAL);
+}
+
+void sendBaro()
+{
+    bytes<float> data[1];
     data[0].f = myPressure.readAltitude();
+    sendTestData<float>(data, 1, "b");
 }
 
 ////////////////////////////////////////
@@ -245,7 +268,6 @@ void loop()
 {
     // sendTest();
     // updateData();
-    updateBaro();
-    sendData();
+    sendBaro();
     delay(300);
 }
