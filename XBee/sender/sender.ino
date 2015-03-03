@@ -204,6 +204,18 @@ void getAccMagGyro(float *accMagGyro)
 
 //////////////////////////////////////////////
 
+int8_t counter = 0;
+
+void sendTest() {
+    if (counter > 256) return;
+    Serial.write(counter++);
+    // float_bytes testData;
+    // testData.f = counter++;
+    // Serial.write(testData.b, FLOAT_SIZE);
+}
+
+//////////////////////////////////////////////
+
 void setup()
 {
     Wire.begin();
@@ -225,6 +237,7 @@ void setup()
 
 void loop()
 {
+    sendTest();
     // updateData();
     // sendData();
     delay(500);
