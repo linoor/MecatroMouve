@@ -383,7 +383,7 @@ void readTest() {
 }
 
 template <typename T>
-T readDataTest() {
+T readSingleData() {
     bytes<T> received;
     for (int i = 0; i < sizeof(T); i++)
     {
@@ -392,7 +392,7 @@ T readDataTest() {
     return received.f;
 }
 
-void readBaroTest()
+void readTestData()
 {
     if (!Serial.available()) return;
 
@@ -411,13 +411,13 @@ void readBaroTest()
     switch (Serial.read())
     {
         case 'a':
-            alti = readDataTest<float>();
+            alti = readSingleData<float>();
             break;
         case 'l': // test for sending long
-            testLong = readDataTest<long>();
+            testLong = readSingleData<long>();
             break;
         case 'i':
-            testInt = readDataTest<int>();
+            testInt = readSingleData<int>();
             break;
         default:
             break;
@@ -472,7 +472,7 @@ void loop() // run over and over
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
 
-    readBaroTest();
+    readTestData();
     delay(300);
 }
 
