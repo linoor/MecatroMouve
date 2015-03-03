@@ -370,6 +370,13 @@ void printDataReceived()
 
 ////////////////////////////////////////
 
+void readTest() {
+    while (!Serial.available());
+    Serial.println(Serial.read());
+}
+
+////////////////////////////////////////
+
 void setup()
 {
     Wire.begin();
@@ -393,6 +400,7 @@ void loop() // run over and over
     // updateData();
     // readData();
     // moveCamera();
+    readTest();
 
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
