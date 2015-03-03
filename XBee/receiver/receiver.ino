@@ -399,32 +399,26 @@ void readBaroTest()
     int counter = 0;
     while (Serial.read() != START_SIGNAL)
     {
-        if (50 < counter++)
-        {
-            Serial.println("START_SIGNAL not received...");
-            return;
-        }
     }
-    delay(100);
-
+    // delay(100);
 
     float alti;
     int32_t gpsPosition[2];
 
     switch (Serial.read())
     {
-        case 'b':
+        case 'a':
             alti = readDataTest<float>();
             break;
         default:
             break;
     }
 
-
-    delay(100);
+    // delay(100);
     // Wait for END_SIGNAL
     if (Serial.read() != END_SIGNAL)
     {
+        // Serial.println(alti);
         Serial.println("END_SIGNAL not received... Truncate data...");
     }
     else

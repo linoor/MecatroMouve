@@ -212,6 +212,7 @@ void getAccMagGyro(float *accMagGyro)
 //////////////////////////////////////////////
 // Debugging phase
 int8_t counter = 0;
+float counterF = 0.0;
 
 void sendTest() {
     if (counter > 256) return;
@@ -236,11 +237,11 @@ void sendTestData(bytes<T> dataToSend[], int dataSize, String typeSignal)
     Serial.print(END_SIGNAL);
 }
 
-void sendBaro()
+void sendFloatTest()
 {
     bytes<float> data[1];
-    data[0].f = myPressure.readAltitude();
-    sendTestData<float>(data, 1, "b");
+    data[0].f = counterF += 0.5;
+    sendTestData<float>(data, 1, "a");
 }
 
 ////////////////////////////////////////
@@ -268,6 +269,6 @@ void loop()
 {
     // sendTest();
     // updateData();
-    sendBaro();
+    sendFloatTest();
     delay(300);
 }
