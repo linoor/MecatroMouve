@@ -405,10 +405,19 @@ void readBaroTest()
     float alti;
     int32_t gpsPosition[2];
 
+    long testLong;
+    int testInt;
+
     switch (Serial.read())
     {
         case 'a':
             alti = readDataTest<float>();
+            break;
+        case 'l': // test for sending long
+            testLong = readDataTest<long>();
+            break;
+        case 'i':
+            testInt = readDataTest<int>();
             break;
         default:
             break;
@@ -428,7 +437,8 @@ void readBaroTest()
         //     dataReceived[i] = temp[i];
         // }
         // printDataReceived();
-        Serial.println(alti);
+        Serial.println(testLong);
+        // Serial.println(testInt);
     }
     Serial.println();
 }

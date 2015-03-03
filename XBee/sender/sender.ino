@@ -244,6 +244,22 @@ void sendFloatTest()
     sendTestData<float>(data, 1, "a");
 }
 
+long counterL = 0;
+void sendLongTest()
+{
+    bytes<long> data[1];
+    data[0].f = counterL++;
+    sendTestData<long>(data, 1, "l");
+}
+
+int counterI = 0;
+void sendIntTest()
+{
+    bytes<int> data[1];
+    data[0].f = counterI++;
+    sendTestData<int>(data, 1, "i");
+}
+
 ////////////////////////////////////////
 
 void setup()
@@ -270,5 +286,7 @@ void loop()
     // sendTest();
     // updateData();
     sendFloatTest();
+    // sendLongTest();
+    // sendIntTest();
     delay(300);
 }
