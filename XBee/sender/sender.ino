@@ -11,7 +11,7 @@
 
 #define START_SIGNAL "s"
 #define END_SIGNAL "e"
-#define SEND_SIZE 9
+#define SEND_SIZE 1
 #define FLOAT_SIZE sizeof(float)
 
 #define GPSRXPin 10
@@ -216,8 +216,8 @@ void sendTest() {
     // Serial.write(testData.b, FLOAT_SIZE);
 }
 
-void sendBaro() {
-
+void updateBaro() {
+    data[0].f = myPressure.readAltitude();
 }
 
 ////////////////////////////////////////
@@ -245,6 +245,7 @@ void loop()
 {
     // sendTest();
     // updateData();
-    // sendData();
+    updateBaro();
+    sendData();
     delay(300);
 }
