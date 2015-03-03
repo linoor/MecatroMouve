@@ -402,7 +402,7 @@ void loop() // run over and over
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
 
-    readTest();
+    // readTest();
     delay(300);
 }
 

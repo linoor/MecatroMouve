@@ -203,6 +203,8 @@ void getAccMagGyro(float *accMagGyro)
 }
 
 //////////////////////////////////////////////
+// Debugging phase
+
 
 int8_t counter = 0;
 
@@ -212,6 +214,10 @@ void sendTest() {
     // float_bytes testData;
     // testData.f = counter++;
     // Serial.write(testData.b, FLOAT_SIZE);
+}
+
+void sendBaro() {
+
 }
 
 ////////////////////////////////////////
