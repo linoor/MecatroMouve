@@ -237,7 +237,7 @@ void setup()
 
 void loop()
 {
-    sendTest();
+    // sendTest();
     // updateData();
     // sendData();
     delay(300);
