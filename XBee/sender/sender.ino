@@ -262,31 +262,6 @@ void sendIntTest()
 
 ////////////////////////////////////////
 
-int8_t counter = 0;
-float counterF = 0.0;
-
-void sendTest() {
-    if (counter > 256) return;
-    Serial.write(counter++);
-    // float_bytes testData;
-    // testData.f = counter++;
-    // Serial.write(testData.b, FLOAT_SIZE);
-}
-
-void sendFloatTest() {
-    if (counterF > 100) return;
-
-    float_bytes f_b;
-    counterF += 0.5;
-    f_b.f = counterF;
-
-    Serial.write(START_SIGNAL);
-    Serial.write(f_b.b, FLOAT_SIZE);
-    Serial.write(END_SIGNAL);
-}
-
-//////////////////////////////////////////////
-
 void setup()
 {
     Wire.begin();
