@@ -375,6 +375,39 @@ void readTest() {
     Serial.println(Serial.read());
 }
 
+void readFloatTest() {
+    // float counterF = readFloat();
+    // Serial.println(counterF);
+
+    float_bytes payload;
+
+    if (!Serial.available())
+    {
+        return;
+    }
+
+    // Wait for START_SIGNAL
+    while (Serial.read() != START_SIGNAL)
+    {
+        Serial.println("START_SIGNAL not received...");
+    }
+
+    for (int i = 0; i < FLOAT_SIZE; i++)
+    {
+        payload.b[i] = Serial.read();
+        // delay(5);
+    }
+
+    if (Serial.read() != END_SIGNAL)
+    {
+        Serial.println("END_SIGNAL not received... Truncate data...");
+    }
+    else
+    {
+        Serial.println(payload.f);
+    }
+}
+
 ////////////////////////////////////////
 
 void setup()
@@ -400,11 +433,11 @@ void loop() // run over and over
     // updateData();
     // readData();
     // moveCamera();
-    readTest();
+    readFloatTest();
 
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
-    delay(300);
+    delay(250);
 }
 
 int parse_MinMax(int val, int mini, int maxi)
