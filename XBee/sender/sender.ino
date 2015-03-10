@@ -49,6 +49,11 @@ union bytes
 
 float_bytes data[SEND_SIZE];
 
+
+////////// prototype //////////////////
+
+void getGPSPosition(float *pos);
+
 ////////// setting things up //////////
 
 void setupBaro()
@@ -264,6 +269,7 @@ void sendBaroTest()
 {
     bytes<float> alti[1];
     alti[0].f = myPressure.readAltitude();
+    printData<float>(alti[0].f);
     sendTestData<float>(alti, 1, "a");
 }
 
