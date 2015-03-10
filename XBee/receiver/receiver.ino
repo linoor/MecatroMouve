@@ -30,7 +30,7 @@ union float_bytes
     uint8_t b[FLOAT_SIZE];
 };
 
-template <typename T>
+template <typename T> 
 union bytes
 {
     T f;
@@ -388,6 +388,8 @@ T readDataTest() {
     for (int i = 0; i < sizeof(T); i++)
     {
         received.b[i] = Serial.read();
+        Serial.write(received.b[i]);
+        delay(10);
     }
     return received.f;
 }
@@ -404,21 +406,32 @@ void readBaroTest()
 
     float alti;
     int32_t gpsPosition[2];
-
+ 
     long testLong;
     int testInt;
 
     switch (Serial.read())
     {
         case 'a':
+            Serial.print("a");
             alti = readDataTest<float>();
             break;
         case 'l': // test for sending long
+            Serial.println("l");
             testLong = readDataTest<long>();
             break;
         case 'i':
+            Serial.println("i");
             testInt = readDataTest<int>();
             break;
+        case 'd':
+            Serial.println("Start looking for end signal");
+            while(Serial.read() != END_SIGNAL){
+                //Serial.println("Not received yet... going on");
+            }
+            Serial.println("Found end signal. Returning");
+            return;
+ 
         default:
             break;
     }
@@ -437,7 +450,7 @@ void readBaroTest()
         //     dataReceived[i] = temp[i];
         // }
         // printDataReceived();
-        Serial.println(testLong);
+        Serial.println(alti);
         // Serial.println(testInt);
     }
     Serial.println();
