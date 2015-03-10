@@ -4,10 +4,12 @@
 #include "MPL3115A2.h"
 #include "SoftwareSerial.h"
 #include "TinyGPS++.h"
-
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM303_U.h>
 #include <Adafruit_L3GD20_U.h>
+
+#include "../setup/def.h"
+#include "../setup/setup.cpp"
 
 #define START_SIGNAL "s"
 #define END_SIGNAL "e"
@@ -30,24 +32,10 @@ Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
 Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
 Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 
-///////////////////////////////////////
-//Les données
-typedef byte uint8_t;
+bytes<float> data[SEND_SIZE];
 
-union float_bytes
-{
-    float f;
-    byte b[FLOAT_SIZE];
-};
-
-template <typename T>
-union bytes
-{
-    T f;
-    byte b[sizeof(T)];
-};
-
-float_bytes data[SEND_SIZE];
+////////// prototype //////////////////
+void getGPSPosition(float *pos);
 
 
 ////////// prototype //////////////////
@@ -55,16 +43,6 @@ float_bytes data[SEND_SIZE];
 void getGPSPosition(float *pos);
 
 ////////// setting things up //////////
-
-void setupBaro()
-{
-    myPressure.begin();
-
-    myPressure.setModeAltimeter();
-    myPressure.setOversampleRate(6); // Pour lire 1 seule valeur, il lui faut 512ms
-    // Du coup pas besoin de moyenner quoique ce soit!
-    myPressure.enableEventFlags();
-}
 
 void setupAccMagGyro()
 {
@@ -90,7 +68,7 @@ void setupGPS()
     Serial.println("GPS started...");
 }
 
-void testConnection() {
+void senderConnect() {
     while (true)
     {
         Serial.print("A");
@@ -106,14 +84,6 @@ void testConnection() {
                 return;
             }
         }
-    }
-}
-
-void flush()
-{
-    while (Serial.available())
-    {
-        Serial.read();
     }
 }
 
@@ -155,7 +125,7 @@ void updateData()
 
 ///////////////////////////////////////
 //envoyer les données
-void sendData()
+void sendDataOld()
 {
     //signaler le début
     Serial.print(START_SIGNAL);
@@ -216,19 +186,12 @@ void getAccMagGyro(float *accMagGyro)
 
 //////////////////////////////////////////////
 // Debugging phase
+
 int8_t counter = 0;
 float counterF = 0.0;
 
-void sendTest() {
-    if (counter > 256) return;
-    Serial.write(counter++);
-    // float_bytes testData;
-    // testData.f = counter++;
-    // Serial.write(testData.b, FLOAT_SIZE);
-}
-
 template <typename T>
-void sendTestData(bytes<T> dataToSend[], int dataSize, String typeSignal)
+void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
 {
     //signaler le début
     Serial.print(START_SIGNAL);
@@ -242,11 +205,20 @@ void sendTestData(bytes<T> dataToSend[], int dataSize, String typeSignal)
     Serial.print(END_SIGNAL);
 }
 
+template <typename T>
+void printDebugData(T debugData)
+{
+    Serial.print(START_SIGNAL);
+    Serial.print("d");
+    Serial.println(debugData);
+    Serial.print(END_SIGNAL);
+}
+
 void sendFloatTest()
 {
     bytes<float> data[1];
     data[0].f = counterF += 0.5;
-    sendTestData<float>(data, 1, "a");
+    sendData<float>(data, 1, "a");
 }
 
 long counterL = 0;
@@ -254,7 +226,7 @@ void sendLongTest()
 {
     bytes<long> data[1];
     data[0].f = counterL++;
-    sendTestData<long>(data, 1, "l");
+    sendData<long>(data, 1, "l");
 }
 
 int counterI = 0;
@@ -262,15 +234,17 @@ void sendIntTest()
 {
     bytes<int> data[1];
     data[0].f = counterI++;
-    sendTestData<int>(data, 1, "i");
+    sendData<int>(data, 1, "i");
 }
 
-void sendBaroTest()
+void sendAltitude()
 {
     bytes<float> alti[1];
     alti[0].f = myPressure.readAltitude();
-    printData<float>(alti[0].f);
-    sendTestData<float>(alti, 1, "a");
+    sendData<float>(alti, 1, "a");
+    #if DEBUG
+    printDebugData<float>(alti[0].f);
+    #endif
 }
 
 ////////////////////////////////////////
@@ -279,7 +253,7 @@ void setup()
 {
     Wire.begin();
 
-    setupBaro();
+    setupBaro(myPressure);
     // setupGPS();
     // setupAccMagGyro();
 
@@ -287,7 +261,7 @@ void setup()
     flush();
     Serial.println("Setup started!");
 
-    testConnection();
+    senderConnect();
 
     flush();
     delay(500);
@@ -301,6 +275,6 @@ void loop()
     // sendFloatTest();
     // sendLongTest();
     // sendIntTest();
-    sendBaroTest();
+    sendAltitude();
     delay(300);
 }

@@ -9,6 +9,9 @@
 #include <Adafruit_LSM303_U.h>
 #include <Adafruit_L3GD20_U.h>
 
+#include "../setup/def.h"
+#include "../setup/setup.cpp"
+
 #define DISTANCE 3 // en mètres
 #define FLOAT_SIZE sizeof(float)
 #define START_SIGNAL 's'
@@ -22,20 +25,10 @@
 
 #define R 6371000
 
-#define DEBUG
+#define IDLE_STEPS 80
+#define CALIBRATION_STEPS 20
 
-union float_bytes
-{
-    float f;
-    uint8_t b[FLOAT_SIZE];
-};
-
-template <typename T>
-union bytes
-{
-    T f;
-    byte b[sizeof(T)];
-};
+// #define DEBUG
 
 
 ///////////////////////////////////////
@@ -58,7 +51,6 @@ Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 Servo myservoVertical, myservoHorizontal;
 float receive_pressure, mesure_pressure, diff_pressure;
 
-
 //Everything in rad
 //Everything in meters
 
@@ -68,19 +60,10 @@ int distance;
 float angleVertical;
 float bearing;
 const float Pi = 3.14159;
+float myAlti;
+float correction = 0; //Correction factor to apply to compute altitude differential.
 
 ////////// setting things up //////////
-
-void setupBaro()
-{
-    myPressure.begin();
-
-    myPressure.setModeAltimeter();
-    myPressure.setOversampleRate(6); // Pour lire 1 seule valeur, il lui faut 512ms
-    // Du coup pas besoin de moyenner quoique ce soit!
-    myPressure.setModeActive();
-    myPressure.enableEventFlags();
-}
 
 void setupGPS()
 {
@@ -114,7 +97,7 @@ void setupServo()
     myservoHorizontal.write(0);
 }
 
-void testConnection()
+void receiverConnect()
 {
     Serial.println("Start looking for A!");
     while (true)
@@ -133,14 +116,6 @@ void testConnection()
                 return;
             }
         }
-    }
-}
-
-void flush()
-{
-    while (Serial.available())
-    {
-        Serial.read();
     }
 }
 
@@ -216,18 +191,21 @@ void printDataCurrent()
 
 void updateData()
 {
+    Serial.print("Updating data... My altitude: ");
     // Serial.print(myPressure.readAltitude());
     float gpsPosition[2];
     float accMagGyro[9];
 
-    for(int i = 0; i < 9; i ++){
+    for(int i = 0; i < 9; i++){
         accMagGyro[i] = 0;
     }
 
-    getGPSPosition(gpsPosition);
+    //getGPSPosition(gpsPosition);
     // getAccMagGyro(accMagGyro);
 
     dataCurrent[0] = myPressure.readAltitude();
+    myAlti = myPressure.readAltitude();
+    Serial.println(myAlti);
     dataCurrent[1] = gpsPosition[0];
     dataCurrent[2] = gpsPosition[1];
     dataCurrent[3] = accMagGyro[0];
@@ -240,7 +218,7 @@ void updateData()
     dataCurrent[10] = accMagGyro[7];
     dataCurrent[11] = accMagGyro[8];
 
-    printDataCurrent();
+    //printDataCurrent();
 }
 
 ////////////////////////////////////////
@@ -306,7 +284,7 @@ void moveCamera()
 
 float readFloat()
 {
-    float_bytes payload;
+    bytes<float> payload;
 
     while (!Serial.available());
 
@@ -377,11 +355,6 @@ void printDataReceived()
 
 ////////////////////////////////////////
 
-void readTest() {
-    while (!Serial.available());
-    Serial.println(Serial.read());
-}
-
 template <typename T>
 T readSingleData() {
     bytes<T> received;
@@ -391,20 +364,12 @@ T readSingleData() {
     }
     return received.f;
 }
-
-void calAltiDiff(float recAlti)
-{
-    float testAlti = myPressure.readAltitude();
-    float diff = recAlti - testAlti;
-    Serial.print("Altitude diff: ");
-    Serial.println(diff);
-}
+int counter = 0;
 
 void readTestData()
 {
     if (!Serial.available()) return;
 
-    int counter = 0;
     while (Serial.read() != START_SIGNAL)
     {
     }
@@ -419,15 +384,38 @@ void readTestData()
     switch (Serial.read())
     {
         case 'a':
-            alti = readSingleData<float>();
-            calAltiDiff(alti);
+            Serial.println(counter);
+            alti = readDataTest<float>();
+            if(counter < IDLE_STEPS){
+                counter++;
+            }
+            else{
+              if(counter - IDLE_STEPS < CALIBRATION_STEPS){
+                correction += (alti - myAlti);
+                counter++;
+                }
+                else if(counter - IDLE_STEPS == CALIBRATION_STEPS) {
+                    correction = correction/CALIBRATION_STEPS;
+                    counter++;
+                    Serial.println(correction);
+                }
+            }
             break;
         case 'l': // test for sending long
-            testLong = readSingleData<long>();
+            Serial.println("l");
+            testLong = readDataTest<long>();
             break;
         case 'i':
-            testInt = readSingleData<int>();
+            Serial.println("i");
+            testInt = readDataTest<int>();
             break;
+        case 'd':
+            Serial.println("Start looking for end signal");
+            while(Serial.read() != END_SIGNAL){
+                //Serial.println("Not received yet... going on");
+            }
+            Serial.println("Found end signal. Returning");
+            return;
         default:
             break;
     }
@@ -446,13 +434,12 @@ void readTestData()
         //     dataReceived[i] = temp[i];
         // }
         // printDataReceived();
-        // Serial.println(testLong);
-        // Serial.println(testInt);
+        Serial.print("Alti received: ");
+        Serial.println(alti);
+        Serial.print("Differential: ");
+        Serial.println(alti - myAlti - correction);
     }
-    Serial.println();
 }
-
-
 
 ////////////////////////////////////////
 
@@ -460,7 +447,7 @@ void setup()
 {
     Wire.begin();
 
-    setupBaro();
+    setupBaro(myPressure);
     // setupGPS();
     // setupAccMagGyro();
     // setupServo();
@@ -468,25 +455,27 @@ void setup()
     Serial.begin(57600);
     flush();
 
-    testConnection();
+    receiverConnect();
 
     flush();
     delay(500);
+  //  calibrateAltitude();
+
 }
+
+int loopCounter = 0;
 
 void loop() // run over and over
 {
-    // updateData();
+    if(loopCounter == 0){
+        updateData();
+    }
+    loopCounter = (loopCounter+1)%10;
     // readData();
     // moveCamera();
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
     readTestData();
     delay(300);
-}
-
-int parse_MinMax(int val, int mini, int maxi)
-{
-    return (val > maxi) ? maxi : (val < mini) ? mini : val;
 }
 
