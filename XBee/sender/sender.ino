@@ -260,6 +260,13 @@ void sendIntTest()
     sendTestData<int>(data, 1, "i");
 }
 
+void sendBaroTest()
+{
+    bytes<float> alti[1];
+    alti[0].f = myPressure.readAltitude();
+    sendTestData<float>(alti, 1, "a");
+}
+
 ////////////////////////////////////////
 
 void setup()
@@ -285,8 +292,9 @@ void loop()
 {
     // sendTest();
     // updateData();
-    sendFloatTest();
+    // sendFloatTest();
     // sendLongTest();
     // sendIntTest();
+    sendBaroTest();
     delay(300);
 }

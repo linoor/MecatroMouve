@@ -76,7 +76,7 @@ void setupBaro()
     myPressure.begin();
 
     myPressure.setModeAltimeter();
-    myPressure.setOversampleRate(4); // Pour lire 1 seule valeur, il lui faut 512ms
+    myPressure.setOversampleRate(6); // Pour lire 1 seule valeur, il lui faut 512ms
     // Du coup pas besoin de moyenner quoique ce soit!
     //myPressure.setModeActive();
     myPressure.enableEventFlags();
@@ -398,7 +398,15 @@ T readDataTest() {
     return received.f;
 }
 
-void readBaroTest()
+void calAltiDiff(float recAlti)
+{
+    float testAlti = myPressure.readAltitude();
+    float diff = recAlti - testAlti;
+    Serial.print("Altitude diff: ");
+    Serial.println(diff);
+}
+
+void readTestData()
 {
     if (!Serial.available()) return;
 
@@ -462,6 +470,7 @@ void readBaroTest()
 }
 
 
+
 ////////////////////////////////////////
 
 void setup()
@@ -489,8 +498,7 @@ void loop() // run over and over
     // moveCamera();
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
-
-    readBaroTest();
+    readTestData();
     delay(300);
 }
 
