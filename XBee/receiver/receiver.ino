@@ -9,6 +9,9 @@
 #include <Adafruit_LSM303_U.h>
 #include <Adafruit_L3GD20_U.h>
 
+#include "../setup/def.h"
+#include "../setup/setup.cpp"
+
 #define DISTANCE 3 // en mètres
 #define FLOAT_SIZE sizeof(float)
 #define START_SIGNAL 's'
@@ -25,20 +28,7 @@
 #define IDLE_STEPS 80
 #define CALIBRATION_STEPS 20
 
-#define DEBUG
-
-union float_bytes
-{
-    float f;
-    uint8_t b[FLOAT_SIZE];
-};
-
-template <typename T>
-union bytes
-{
-    T f;
-    byte b[sizeof(T)];
-};
+// #define DEBUG
 
 
 ///////////////////////////////////////
@@ -61,7 +51,6 @@ Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 Servo myservoVertical, myservoHorizontal;
 float receive_pressure, mesure_pressure, diff_pressure;
 
-
 //Everything in rad
 //Everything in meters
 
@@ -75,17 +64,6 @@ float myAlti;
 float correction = 0; //Correction factor to apply to compute altitude differential.
 
 ////////// setting things up //////////
-
-void setupBaro()
-{
-    myPressure.begin();
-
-    myPressure.setModeAltimeter();
-    myPressure.setOversampleRate(5); // Pour lire 1 seule valeur, il lui faut 512ms
-    // Du coup pas besoin de moyenner quoique ce soit!
-    // myPressure.setModeActive();
-    myPressure.enableEventFlags();
-}
 
 void setupGPS()
 {
@@ -119,7 +97,7 @@ void setupServo()
     myservoHorizontal.write(0);
 }
 
-void testConnection()
+void receiverConnect()
 {
     Serial.println("Start looking for A!");
     while (true)
@@ -138,14 +116,6 @@ void testConnection()
                 return;
             }
         }
-    }
-}
-
-void flush()
-{
-    while (Serial.available())
-    {
-        Serial.read();
     }
 }
 
@@ -314,7 +284,7 @@ void moveCamera()
 
 float readFloat()
 {
-    float_bytes payload;
+    bytes<float> payload;
 
     while (!Serial.available());
 
@@ -385,11 +355,6 @@ void printDataReceived()
 
 ////////////////////////////////////////
 
-void readTest() {
-    while (!Serial.available());
-    Serial.println(Serial.read());
-}
-
 template <typename T>
 T readDataTest() {
     bytes<T> received;
@@ -433,9 +398,9 @@ void readTestData()
                     correction = correction/CALIBRATION_STEPS;
                     counter++;
                     Serial.println(correction);
-                }  
+                }
             }
-            
+
             break;
         case 'l': // test for sending long
             Serial.println("l");
@@ -474,11 +439,8 @@ void readTestData()
         Serial.println(alti);
         Serial.print("Differential: ");
         Serial.println(alti - myAlti - correction);
-        // Serial.println(testInt);
     }
 }
-
-
 
 ////////////////////////////////////////
 
@@ -486,7 +448,7 @@ void setup()
 {
     Wire.begin();
 
-    setupBaro();
+    setupBaro(myPressure);
     // setupGPS();
     // setupAccMagGyro();
     // setupServo();
@@ -494,7 +456,7 @@ void setup()
     Serial.begin(57600);
     flush();
 
-    testConnection();
+    receiverConnect();
 
     flush();
     delay(500);
@@ -516,10 +478,5 @@ void loop() // run over and over
     */
     readTestData();
     delay(300);
-}
-
-int parse_MinMax(int val, int mini, int maxi)
-{
-    return (val > maxi) ? maxi : (val < mini) ? mini : val;
 }
 
