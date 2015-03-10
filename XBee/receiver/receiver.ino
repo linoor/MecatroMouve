@@ -22,6 +22,9 @@
 
 #define R 6371000
 
+#define IDLE_STEPS 80
+#define CALIBRATION_STEPS 20
+
 #define DEBUG
 
 union float_bytes
@@ -68,6 +71,8 @@ int distance;
 float angleVertical;
 float bearing;
 const float Pi = 3.14159;
+float myAlti;
+float correction = 0; //Correction factor to apply to compute altitude differential.
 
 ////////// setting things up //////////
 
@@ -76,7 +81,7 @@ void setupBaro()
     myPressure.begin();
 
     myPressure.setModeAltimeter();
-    myPressure.setOversampleRate(6); // Pour lire 1 seule valeur, il lui faut 512ms
+    myPressure.setOversampleRate(5); // Pour lire 1 seule valeur, il lui faut 512ms
     // Du coup pas besoin de moyenner quoique ce soit!
     //myPressure.setModeActive();
     myPressure.enableEventFlags();
@@ -213,9 +218,6 @@ void printDataCurrent()
     Serial.print("Gyro y   (9DoG) : "); Serial.println(dataCurrent[10]);
     Serial.print("Gyro z   (9DoG) : "); Serial.println(dataCurrent[11]);
 }
-
-
-float myAlti;
 
 void updateData()
 {
@@ -397,20 +399,12 @@ T readDataTest() {
     }
     return received.f;
 }
-
-void calAltiDiff(float recAlti)
-{
-    float testAlti = myPressure.readAltitude();
-    float diff = recAlti - testAlti;
-    Serial.print("Altitude diff: ");
-    Serial.println(diff);
-}
+int counter = 0;
 
 void readTestData()
 {
     if (!Serial.available()) return;
 
-    int counter = 0;
     while (Serial.read() != START_SIGNAL)
     {
     }
@@ -425,8 +419,23 @@ void readTestData()
     switch (Serial.read())
     {
         case 'a':
-            Serial.println("a");
+            Serial.println(counter);
             alti = readDataTest<float>();
+            if(counter < IDLE_STEPS){
+                counter++;
+            }
+            else{
+              if(counter - IDLE_STEPS < CALIBRATION_STEPS){
+                correction += (alti - myAlti);
+                counter++;
+                }
+                else if(counter - IDLE_STEPS == CALIBRATION_STEPS) {
+                    correction = correction/CALIBRATION_STEPS;
+                    counter++;
+                    Serial.println(correction);
+                }  
+            }
+            
             break;
         case 'l': // test for sending long
             Serial.println("l");
@@ -464,7 +473,7 @@ void readTestData()
         Serial.print("Alti received: ");
         Serial.println(alti);
         Serial.print("Differential: ");
-        Serial.println(alti - myAlti);
+        Serial.println(alti - myAlti - correction);
         // Serial.println(testInt);
     }
 }
@@ -489,11 +498,18 @@ void setup()
 
     flush();
     delay(500);
+  //  calibrateAltitude();
+
 }
+
+int loopCounter = 0;
 
 void loop() // run over and over
 {
-    updateData();
+    if(loopCounter == 0){
+        updateData();
+    }
+    loopCounter = (loopCounter+1)%10;
     // readData();
     // moveCamera();
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
