@@ -220,7 +220,7 @@ void updateData()
     float gpsPosition[2];
     float accMagGyro[9];
 
-    for(int i = 0; i < 9; i ++){
+    for(int i = 0; i < 9; i++){
         accMagGyro[i] = 0;
     }
 
