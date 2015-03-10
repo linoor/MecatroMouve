@@ -49,6 +49,9 @@ union bytes
 
 float_bytes data[SEND_SIZE];
 
+////////// prototype //////////////////
+void getGPSPosition(float *pos);
+
 ////////// setting things up //////////
 
 void setupBaro()
@@ -237,6 +240,19 @@ void sendTestData(bytes<T> dataToSend[], int dataSize, String typeSignal)
     Serial.print(END_SIGNAL);
 }
 
+template <typename T>
+void printData(T debugData)
+{
+    // signaler le début
+    Serial.print(START_SIGNAL);
+    // send debug signal to receiver
+    Serial.print("d");
+    //envoyer de la merde
+    Serial.println(debugData);
+    //signaler la fin
+    Serial.print(END_SIGNAL);
+}
+
 void sendFloatTest()
 {
     bytes<float> data[1];
@@ -264,9 +280,9 @@ void sendBaroTest()
 {
     bytes<float> alti[1];
     alti[0].f = myPressure.readAltitude();
+    // printData<float>(alti[0].f);
     sendTestData<float>(alti, 1, "a");
 }
-
 ////////////////////////////////////////
 
 void setup()

@@ -33,7 +33,7 @@ union float_bytes
     uint8_t b[FLOAT_SIZE];
 };
 
-template <typename T> 
+template <typename T>
 union bytes
 {
     T f;
@@ -83,7 +83,7 @@ void setupBaro()
     myPressure.setModeAltimeter();
     myPressure.setOversampleRate(5); // Pour lire 1 seule valeur, il lui faut 512ms
     // Du coup pas besoin de moyenner quoique ce soit!
-    //myPressure.setModeActive();
+    // myPressure.setModeActive();
     myPressure.enableEventFlags();
 }
 
@@ -226,7 +226,7 @@ void updateData()
     float gpsPosition[2];
     float accMagGyro[9];
 
-    for(int i = 0; i < 9; i ++){
+    for(int i = 0; i < 9; i++){
         accMagGyro[i] = 0;
     }
 
@@ -412,7 +412,7 @@ void readTestData()
 
     float alti;
     int32_t gpsPosition[2];
- 
+
     long testLong;
     int testInt;
 
