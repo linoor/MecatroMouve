@@ -280,7 +280,7 @@ void sendBaroTest()
 {
     bytes<float> alti[1];
     alti[0].f = myPressure.readAltitude();
-    printData<float>(alti[0].f);
+    // printData<float>(alti[0].f);
     sendTestData<float>(alti, 1, "a");
 }
 ////////////////////////////////////////
