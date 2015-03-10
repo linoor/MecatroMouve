@@ -214,8 +214,12 @@ void printDataCurrent()
     Serial.print("Gyro z   (9DoG) : "); Serial.println(dataCurrent[11]);
 }
 
+
+float myAlti;
+
 void updateData()
 {
+    Serial.print("Updating data... My altitude: ");
     // Serial.print(myPressure.readAltitude());
     float gpsPosition[2];
     float accMagGyro[9];
@@ -224,10 +228,12 @@ void updateData()
         accMagGyro[i] = 0;
     }
 
-    getGPSPosition(gpsPosition);
+    //getGPSPosition(gpsPosition);
     // getAccMagGyro(accMagGyro);
 
     dataCurrent[0] = myPressure.readAltitude();
+    myAlti = myPressure.readAltitude();
+    Serial.println(myAlti);
     dataCurrent[1] = gpsPosition[0];
     dataCurrent[2] = gpsPosition[1];
     dataCurrent[3] = accMagGyro[0];
@@ -240,7 +246,7 @@ void updateData()
     dataCurrent[10] = accMagGyro[7];
     dataCurrent[11] = accMagGyro[8];
 
-    printDataCurrent();
+    //printDataCurrent();
 }
 
 ////////////////////////////////////////
@@ -383,7 +389,7 @@ void readTest() {
 }
 
 template <typename T>
-T readSingleData() {
+T readDataTest() {
     bytes<T> received;
     for (int i = 0; i < sizeof(T); i++)
     {
@@ -419,15 +425,24 @@ void readTestData()
     switch (Serial.read())
     {
         case 'a':
-            alti = readSingleData<float>();
-            calAltiDiff(alti);
+            Serial.println("a");
+            alti = readDataTest<float>();
             break;
         case 'l': // test for sending long
-            testLong = readSingleData<long>();
+            Serial.println("l");
+            testLong = readDataTest<long>();
             break;
         case 'i':
-            testInt = readSingleData<int>();
+            Serial.println("i");
+            testInt = readDataTest<int>();
             break;
+        case 'd':
+            Serial.println("Start looking for end signal");
+            while(Serial.read() != END_SIGNAL){
+                //Serial.println("Not received yet... going on");
+            }
+            Serial.println("Found end signal. Returning");
+            return;
         default:
             break;
     }
@@ -446,10 +461,12 @@ void readTestData()
         //     dataReceived[i] = temp[i];
         // }
         // printDataReceived();
-        // Serial.println(testLong);
+        Serial.print("Alti received: ");
+        Serial.println(alti);
+        Serial.print("Differential: ");
+        Serial.println(alti - myAlti);
         // Serial.println(testInt);
     }
-    Serial.println();
 }
 
 
@@ -476,7 +493,7 @@ void setup()
 
 void loop() // run over and over
 {
-    // updateData();
+    updateData();
     // readData();
     // moveCamera();
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
