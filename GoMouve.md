@@ -121,6 +121,26 @@ Variables `f` and `b` actually point to the same memory block (4 bytes in this c
 
 To handle each ideal data type of the sensor, we thereby implement this part with C++ template.
 
+Each data set should be sent at each refresh with a starting signal, a data type signal, and an ending signal to prevent `receiver` from parsing incorrectly due to data loss.
+
+As in `sendData` function:
+ 
+	template <typename T>
+	void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
+	{
+	    Serial.print(START_SIGNAL);
+	    Serial.print(typeSignal);
+	    for (int i = 0; i < dataSize; i++)
+	    {
+	        Serial.write(dataToSend[i].b, sizeof(T));
+	    }
+	    Serial.print(END_SIGNAL);
+	}
+
+The current setting of protocal follows
+* `START_SIGNAL`: s
+* `END_SIGNAL`: e
+* `typeSignal`: i, l, f, a, d (as `int`, `long`, `float`, altitude, debug)
 
 
 ### Moving Camera
