@@ -101,6 +101,27 @@ Note:
 
 #### Sending Data
 
+The transmission of data between XBees is facilited with C++ data type `union`.
+
+For example:
+
+	union bytes
+	{
+		float f;
+		byte b[sizeof(float)];
+	}
+
+Variables `f` and `b` actually point to the same memory block (4 bytes in this case), which allows us to manipulate the data as `float` number, and to send data as byte over XBee.
+
+	bytes data;
+	// manipulation of data
+	// e.g. data.f = myPressure.readAltitude();
+
+	Serial.write(data.b, sizeof(float));
+
+To handle each ideal data type of the sensor, we thereby implement this part with C++ template.
+
+
 
 ### Moving Camera
 #### Sender
