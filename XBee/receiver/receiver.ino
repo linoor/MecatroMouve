@@ -167,7 +167,6 @@ void updateData()
         accMagGyro[i] = 0;
     }
 
-    //getGPSPosition(gpsPosition);
     // getAccMagGyro(accMagGyro);
 
     dataCurrent[0] = myPressure.readAltitude();
@@ -398,7 +397,11 @@ void readTestData()
     case 'g':
         // receiving gps data
         Serial.println("g");
-        testLong = readDataTest<long>();
+        gpsData = readDataTest<long>();
+        long pos [2];
+        getGPSPosition(ss, gps, pos);
+        Serial.println("gpsData: " + gpsData);
+        Serial.println("gpsPosition: " + pos);
         break;
     case 'l': // test for sending long
         Serial.println("l");
