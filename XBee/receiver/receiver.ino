@@ -402,6 +402,11 @@ void readTestData()
             }
 
             break;
+        case 'g':
+            // receiving gps data
+            Serial.println("g");
+            testLong = readDataTest<long>();
+            break;
         case 'l': // test for sending long
             Serial.println("l");
             testLong = readDataTest<long>();
@@ -449,7 +454,7 @@ void setup()
     Wire.begin();
 
     setupBaro(myPressure);
-    // setupGPS();
+    setupGPS();
     // setupAccMagGyro();
     // setupServo();
 
