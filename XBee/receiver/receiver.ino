@@ -196,7 +196,7 @@ void updateData()
     float gpsPosition[2];
     float accMagGyro[9];
 
-    for(int i = 0; i < 9; i++){
+    for (int i = 0; i < 9; i++) {
         accMagGyro[i] = 0;
     }
 
@@ -259,14 +259,14 @@ void moveCamera()
     altiB = dataReceived[0];
 
     //*** using haversine formula to solve for distance ****
-    float RHS = 1 - cos(latiB - latiA) + cos(latiB)*cos(latiA)*(1-cos(longB-longA));
+    float RHS = 1 - cos(latiB - latiA) + cos(latiB) * cos(latiA) * (1 - cos(longB - longA));
 
     // distance = (int)(R*acos(1 - RHS));
-    angleVertical = atan((altiB-altiA)/distance);
-    bearing = atan2(sin(longB-longA)*cos(latiB), cos(latiA)*sin(latiB) - cos(longB-longA)*sin(latiA)*cos(latiB));
+    angleVertical = atan((altiB - altiA) / distance);
+    bearing = atan2(sin(longB - longA) * cos(latiB), cos(latiA) * sin(latiB) - cos(longB - longA) * sin(latiA) * cos(latiB));
 
-    float servoVert = 90 - angleVertical/Pi*180;
-    float servoHoriz = bearing/Pi*180;
+    float servoVert = 90 - angleVertical / Pi * 180;
+    float servoHoriz = bearing / Pi * 180;
     myservoVertical.write(servoVert);
     myservoHorizontal.write(servoHoriz);
 
@@ -355,8 +355,35 @@ void printDataReceived()
 
 ////////////////////////////////////////
 
+int counter = 0;
+
+void calibrateAltitude(float alti)
+{
+    Serial.println(counter);
+
+    if (counter < IDLE_STEPS)
+    {
+        counter++;
+    }
+    else {
+        if (counter - IDLE_STEPS < CALIBRATION_STEPS)
+        {
+            correction += (alti - myAlti);
+            counter++;
+        }
+        else if (counter - IDLE_STEPS == CALIBRATION_STEPS)
+        {
+            correction = correction / CALIBRATION_STEPS;
+            counter++;
+            Serial.println(correction);
+        }
+    }
+}
+
+
 template <typename T>
-T readDataTest() {
+T readDataTest()
+{
     bytes<T> received;
     for (int i = 0; i < sizeof(T); i++)
     {
@@ -364,7 +391,6 @@ T readDataTest() {
     }
     return received.f;
 }
-int counter = 0;
 
 void readTestData()
 {
@@ -383,42 +409,43 @@ void readTestData()
 
     switch (Serial.read())
     {
-        case 'a':
-            Serial.println(counter);
-            alti = readDataTest<float>();
-            if(counter < IDLE_STEPS){
-                counter++;
-            }
-            else{
-              if(counter - IDLE_STEPS < CALIBRATION_STEPS){
-                correction += (alti - myAlti);
-                counter++;
-                }
-                else if(counter - IDLE_STEPS == CALIBRATION_STEPS) {
-                    correction = correction/CALIBRATION_STEPS;
-                    counter++;
-                    Serial.println(correction);
-                }
-            }
+    case 'a':
+        // Serial.println(counter);
+        alti = readDataTest<float>();
+        // if(counter < IDLE_STEPS){
+        //     counter++;
+        // }
+        // else{
+        //   if(counter - IDLE_STEPS < CALIBRATION_STEPS){
+        //     correction += (alti - myAlti);
+        //     counter++;
+        //     }
+        //     else if(counter - IDLE_STEPS == CALIBRATION_STEPS) {
+        //         correction = correction/CALIBRATION_STEPS;
+        //         counter++;
+        //         Serial.println(correction);
+        //     }
+        // }
+        calibrateAltitude(alti);
 
-            break;
-        case 'l': // test for sending long
-            Serial.println("l");
-            testLong = readDataTest<long>();
-            break;
-        case 'i':
-            Serial.println("i");
-            testInt = readDataTest<int>();
-            break;
-        case 'd':
-            Serial.println("Start looking for end signal");
-            while(Serial.read() != END_SIGNAL){
-                //Serial.println("Not received yet... going on");
-            }
-            Serial.println("Found end signal. Returning");
-            return;
-        default:
-            break;
+        break;
+    case 'l': // test for sending long
+        Serial.println("l");
+        testLong = readDataTest<long>();
+        break;
+    case 'i':
+        Serial.println("i");
+        testInt = readDataTest<int>();
+        break;
+    case 'd':
+        Serial.println("Start looking for end signal");
+        while (Serial.read() != END_SIGNAL) {
+            //Serial.println("Not received yet... going on");
+        }
+        Serial.println("Found end signal. Returning");
+        return;
+    default:
+        break;
     }
 
     // delay(100);
@@ -460,7 +487,7 @@ void setup()
 
     flush();
     delay(500);
-  //  calibrateAltitude();
+    //  calibrateAltitude();
 
 }
 
@@ -468,10 +495,10 @@ int loopCounter = 0;
 
 void loop() // run over and over
 {
-    if(loopCounter == 0){
+    if (loopCounter == 0) {
         updateData();
     }
-    loopCounter = (loopCounter+1)%10;
+    loopCounter = (loopCounter + 1) % 10;
     // readData();
     // moveCamera();
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
