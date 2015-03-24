@@ -16,9 +16,9 @@
 #define SEND_SIZE 1
 #define FLOAT_SIZE sizeof(float)
 
-#define GPSRXPin 10
-#define GPSTXPin 11
-#define GPSBaud 9600
+#define GPSRXPin 5
+#define GPSTXPin 4
+// #define GPSBaud 9600
 
 // #define DEBUG
 
@@ -35,7 +35,7 @@ Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 bytes<float> data[SEND_SIZE];
 
 ////////// prototype //////////////////
-void getGPSPosition(float *pos);
+// void getGPSPosition(SoftwareSerial ss, float *pos);
 
 ////////// setting things up //////////
 
@@ -57,11 +57,11 @@ void setupAccMagGyro()
     Serial.println("Gyro started...");
 }
 
-void setupGPS()
-{
-    ss.begin(GPSBaud);
-    Serial.println("GPS started...");
-}
+// void setupGPS()
+// {
+//     ss.begin(GPSBaud);
+//     Serial.println("GPS started...");
+// }
 
 void senderConnect() {
     while (true)
@@ -86,7 +86,7 @@ void senderConnect() {
 
 ///////////////////////////////////////
 //mettre à jour les donnée
-void updateData()
+/*void updateData()
 {
     float gpsPosition[2];
     float accMagGyro[9];
@@ -116,7 +116,7 @@ void updateData()
     // Serial.println();
 // #endif
     // delay(100);
-}
+}*/
 
 ///////////////////////////////////////
 //envoyer les données
@@ -135,28 +135,28 @@ void sendDataOld()
     Serial.print(END_SIGNAL);
 }
 
-void getGPSPosition(float *pos)
-{
-#ifdef DEBUG
-    if (ss.available() <= 0)
-    {
-        Serial.println("GPS data not available...");
-    }
-#endif
+// void getGPSPosition(float *pos)
+// {
+// #ifdef DEBUG
+//     if (ss.available() <= 0)
+//     {
+//         Serial.println("GPS data not available...");
+//     }
+// #endif
 
-    while (ss.available() > 0) // As each character arrives...
-    {
-        char t = ss.read();
-        gps.encode(t);
-    }
+//     while (ss.available() > 0) // As each character arrives...
+//     {
+//         char t = ss.read();
+//         gps.encode(t);
+//     }
 
-    // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
-    if (gps.location.isValid())
-    {
-        pos[0] = gps.location.lat();
-        pos[1] = gps.location.lng();
-    }
-}
+//     // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
+//     if (gps.location.isValid())
+//     {
+//         pos[0] = gps.location.lat();
+//         pos[1] = gps.location.lng();
+//     }
+// }
 
 void getAccMagGyro(float *accMagGyro)
 {
@@ -209,6 +209,19 @@ void printDebugData(T debugData)
     Serial.print(END_SIGNAL);
 }
 
+void sendAltitude()
+{
+    bytes<float> alti[1];
+    alti[0].f = myPressure.readAltitude();
+    sendData<float>(alti, 1, "a");
+    #if DEBUG
+    printDebugData<float>(alti[0].f);
+    #endif
+}
+
+//////////////////////////////////////////////
+// test XBee
+
 void sendFloatTest()
 {
     bytes<float> data[1];
@@ -232,30 +245,38 @@ void sendIntTest()
     sendData<int>(data, 1, "i");
 }
 
-void sendAltitude()
-{
-    bytes<float> alti[1];
-    alti[0].f = myPressure.readAltitude();
-    sendData<float>(alti, 1, "a");
-    #if DEBUG
-    printDebugData<float>(alti[0].f);
-    #endif
-}
 ////////////////////////////////////////
+// test sensors
+void testGPS()
+{
+    float gpsPosition[2];
+    getGPSPosition(ss, gps, gpsPosition);
+    Serial.print("GPS: ");
+    Serial.print(gpsPosition[0]);
+    Serial.print(", ");
+    Serial.println(gpsPosition[1]);
+}
+
+void testBaro()
+{
+    Serial.print("Altitude: ");
+    Serial.println(myPressure.readAltitude());
+}
+
 
 void setup()
 {
     Wire.begin();
 
     setupBaro(myPressure);
-    // setupGPS();
+    setupGPS(ss);
     // setupAccMagGyro();
 
     Serial.begin(57600);
     flush();
     Serial.println("Setup started!");
 
-    senderConnect();
+    // senderConnect();
 
     flush();
     delay(500);
@@ -269,6 +290,8 @@ void loop()
     // sendFloatTest();
     // sendLongTest();
     // sendIntTest();
-    sendAltitude();
+    // sendAltitude();
+    testBaro();
+    testGPS();
     delay(300);
 }
