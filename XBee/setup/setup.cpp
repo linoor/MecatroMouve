@@ -16,7 +16,7 @@ void setupGPS(SoftwareSerial ss)
     Serial.println("GPS started...");
 }
 
-void getGPSPosition(SoftwareSerial ss, TinyGPSPlus gps, float *pos)
+void getGPSPosition(SoftwareSerial ss, TinyGPSPlus gps, long *pos)
 {
 #ifdef DEBUG
     if (ss.available() <= 0)

@@ -166,8 +166,8 @@ void sendAltitude()
     bytes<float> alti[1];
     alti[0].f = myPressure.readAltitude();
     sendData<float>(alti, 1, "a");
-    #if DEBUG
-    printDebugData<float>(alti[0].f);
+    #ifdef DEBUG
+    printDebugData<float>(alti[0].f, "");
     #endif
 }
 
@@ -183,7 +183,7 @@ void sendLocation()
     locByte[1].f = loc[1];
     sendData<long>(locByte, 2, "g");
 
-    #if DEBUG
+    #ifdef DEBUG
     printDebugData<long>(loc[0], "Latitude: ");
     printDebugData<long>(loc[1], "Longitude: ");
     #endif
@@ -249,7 +249,7 @@ void setup()
     flush();
     Serial.println("Setup started!");
 
-    // senderConnect();
+    senderConnect();
 
     flush();
     delay(500);
