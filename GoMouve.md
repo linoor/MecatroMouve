@@ -105,19 +105,19 @@ The transmission of data between XBees is facilited with C++ data type `union`.
 
 For example:
 
-	union bytes
-	{
-		float f;
-		byte b[sizeof(float)];
-	}
+    union bytes
+    {
+        float f;
+        byte b[sizeof(float)];
+    }
 
 Variables `f` and `b` actually point to the same memory block (4 bytes in this case), which allows us to manipulate the data as `float` number, and to send data as byte over XBee.
 
-	bytes data;
-	// manipulation of data
-	// e.g. data.f = myPressure.readAltitude();
+    bytes data;
+    // manipulation of data
+    // e.g. data.f = myPressure.readAltitude();
 
-	Serial.write(data.b, sizeof(float));
+    Serial.write(data.b, sizeof(float));
 
 To handle each ideal data type of the sensor, we thereby implement this part with C++ template.
 
@@ -125,17 +125,17 @@ Each data set should be sent at each refresh with a starting signal, a data type
 
 As in `sendData` function:
  
-	template <typename T>
-	void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
-	{
-	    Serial.print(START_SIGNAL);
-	    Serial.print(typeSignal);
-	    for (int i = 0; i < dataSize; i++)
-	    {
-	        Serial.write(dataToSend[i].b, sizeof(T));
-	    }
-	    Serial.print(END_SIGNAL);
-	}
+    template <typename T>
+    void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
+    {
+        Serial.print(START_SIGNAL);
+        Serial.print(typeSignal);
+        for (int i = 0; i < dataSize; i++)
+        {
+            Serial.write(dataToSend[i].b, sizeof(T));
+        }
+        Serial.print(END_SIGNAL);
+    }
 
 The current setting of protocal follows
 * `START_SIGNAL`: s
