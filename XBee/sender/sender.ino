@@ -57,12 +57,6 @@ void setupAccMagGyro()
     Serial.println("Gyro started...");
 }
 
-// void setupGPS()
-// {
-//     ss.begin(GPSBaud);
-//     Serial.println("GPS started...");
-// }
-
 void senderConnect() {
     while (true)
     {
@@ -118,46 +112,6 @@ void senderConnect() {
     // delay(100);
 }*/
 
-///////////////////////////////////////
-//envoyer les données
-void sendDataOld()
-{
-    //signaler le début
-    Serial.print(START_SIGNAL);
-
-    //envoyer de la merde
-    for (int i = 0; i < SEND_SIZE; i++)
-    {
-        Serial.write(data[i].b, FLOAT_SIZE);
-    }
-
-    //signaler la fin
-    Serial.print(END_SIGNAL);
-}
-
-// void getGPSPosition(float *pos)
-// {
-// #ifdef DEBUG
-//     if (ss.available() <= 0)
-//     {
-//         Serial.println("GPS data not available...");
-//     }
-// #endif
-
-//     while (ss.available() > 0) // As each character arrives...
-//     {
-//         char t = ss.read();
-//         gps.encode(t);
-//     }
-
-//     // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
-//     if (gps.location.isValid())
-//     {
-//         pos[0] = gps.location.lat();
-//         pos[1] = gps.location.lng();
-//     }
-// }
-
 void getAccMagGyro(float *accMagGyro)
 {
     sensors_event_t eventAcc;
@@ -183,7 +137,6 @@ void getAccMagGyro(float *accMagGyro)
 // Debugging phase
 
 int8_t counter = 0;
-float counterF = 0.0;
 
 template <typename T>
 void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
@@ -201,10 +154,11 @@ void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
 }
 
 template <typename T>
-void printDebugData(T debugData)
+void printDebugData(T debugData, String debugMsg)
 {
     Serial.print(START_SIGNAL);
     Serial.print("d");
+    Serial.println(debugMsg);
     Serial.println(debugData);
     Serial.print(END_SIGNAL);
 }
@@ -219,8 +173,26 @@ void sendAltitude()
     #endif
 }
 
+void sendLocation()
+{
+    long loc[2];
+    getGPSPosition(ss, gps, loc);
+
+    bytes<long> locByte[2];
+    locByte[0].f = loc[0];
+    locByte[1].f = loc[1];
+    sendData<long>(locByte, 2, "g");
+
+    #if DEBUG
+    printDebugData<long>(loc[0], "Latitude: ");
+    printDebugData<long>(loc[1], "Longitude: ");
+    #endif
+}
+
 //////////////////////////////////////////////
 // test XBee
+
+float counterF = 0.0;
 
 void sendFloatTest()
 {
@@ -249,7 +221,7 @@ void sendIntTest()
 // test sensors
 void testGPS()
 {
-    float gpsPosition[2];
+    long gpsPosition[2];
     getGPSPosition(ss, gps, gpsPosition);
     Serial.print("GPS: ");
     Serial.print(gpsPosition[0]);
