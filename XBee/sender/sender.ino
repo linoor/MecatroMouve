@@ -20,7 +20,7 @@
 #define GPSTXPin 5
 // #define GPSBaud 9600
 
-// #define DEBUG
+#define DEBUG
 
 MPL3115A2 myPressure;
 
@@ -136,8 +136,6 @@ void getAccMagGyro(float *accMagGyro)
 //////////////////////////////////////////////
 // Debugging phase
 
-int8_t counter = 0;
-
 template <typename T>
 void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
 {
@@ -176,7 +174,9 @@ void sendAltitude()
 void sendLocation()
 {
     long loc[2];
-    getGPSPosition(ss, gps, loc);
+    loc[0] = 123.12;
+    loc[1] = 0.2;
+    // getGPSPosition(ss, gps, loc);
 
     bytes<long> locByte[2];
     locByte[0].f = loc[0];
@@ -235,6 +235,7 @@ void testBaro()
     Serial.println(myPressure.readAltitude());
 }
 
+////////////////////////////////////////
 
 void setup()
 {
@@ -262,8 +263,9 @@ void loop()
     // sendFloatTest();
     // sendLongTest();
     // sendIntTest();
-    // sendAltitude();
-    testBaro();
-    testGPS();
+    sendAltitude();
+    sendLocation();
+    // testBaro();
+    // testGPS();
     delay(300);
 }
