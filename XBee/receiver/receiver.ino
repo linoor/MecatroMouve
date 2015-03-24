@@ -65,12 +65,6 @@ float correction = 0; // Correction factor to apply to compute altitude differen
 
 ////////// setting things up //////////
 
-void setupGPS()
-{
-    ss.begin(GPSBaud);
-    Serial.println("GPS started...");
-}
-
 void setupAccMagGyro()
 {
     /* Initialise the sensor */
@@ -120,33 +114,6 @@ void receiverConnect()
 }
 
 ////////// handling data //////////
-
-void getGPSPosition(float *pos)
-{
-#ifdef DEBUG
-    if (ss.available() <= 0)
-    {
-        Serial.println("GPS data not available...");
-    }
-#endif
-
-    while (ss.available() > 0) // As each character arrives...
-    {
-        char t = ss.read();
-        gps.encode(t);
-    }
-
-    // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
-    if (gps.location.isValid())
-    {
-        pos[0] = gps.location.lat();
-        pos[1] = gps.location.lng();
-    }
-    else {
-        pos[0] = -1;
-        pos[1] = -1;
-    }
-}
 
 void getAccMagGyro(float *accMagGyro)
 {
@@ -480,7 +447,7 @@ void setup()
     Wire.begin();
 
     setupBaro(myPressure);
-    setupGPS();
+    setupGPS(ss);
     // setupAccMagGyro();
     // setupServo();
 
