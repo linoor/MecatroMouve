@@ -19,8 +19,8 @@
 #define RECEIVE_SIZE 9
 #define LOCAL_SIZE 12
 
-#define GPSRXPin 8
-#define GPSTXPin 9
+#define GPSRXPin 4
+#define GPSTXPin 5
 #define GPSBaud 9600
 
 #define R 6371000
@@ -36,7 +36,7 @@
 float dataReceived[RECEIVE_SIZE];
 
 ////////////////////////////////////////
-//les données de CET Arduino
+// les données de CET Arduino
 float dataCurrent[LOCAL_SIZE];
 
 MPL3115A2 myPressure;
@@ -61,7 +61,7 @@ float angleVertical;
 float bearing;
 const float Pi = 3.14159;
 float myAlti;
-float correction = 0; //Correction factor to apply to compute altitude differential.
+float correction = 0; // Correction factor to apply to compute altitude differential.
 
 ////////// setting things up //////////
 
@@ -427,7 +427,11 @@ void readTestData()
         //     }
         // }
         calibrateAltitude(alti);
-
+        break;
+    case 'g':
+        // receiving gps data
+        Serial.println("g");
+        testLong = readDataTest<long>();
         break;
     case 'l': // test for sending long
         Serial.println("l");
@@ -439,7 +443,7 @@ void readTestData()
         break;
     case 'd':
         Serial.println("Start looking for end signal");
-        while (Serial.read() != END_SIGNAL) {
+        while(Serial.read() != END_SIGNAL){
             //Serial.println("Not received yet... going on");
         }
         Serial.println("Found end signal. Returning");
@@ -476,7 +480,7 @@ void setup()
     Wire.begin();
 
     setupBaro(myPressure);
-    // setupGPS();
+    setupGPS();
     // setupAccMagGyro();
     // setupServo();
 

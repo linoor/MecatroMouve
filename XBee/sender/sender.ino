@@ -16,8 +16,8 @@
 #define SEND_SIZE 1
 #define FLOAT_SIZE sizeof(float)
 
-#define GPSRXPin 5
-#define GPSTXPin 4
+#define GPSRXPin 4
+#define GPSTXPin 5
 // #define GPSBaud 9600
 
 // #define DEBUG
