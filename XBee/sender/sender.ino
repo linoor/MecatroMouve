@@ -20,11 +20,11 @@
 #define GPSTXPin 5
 // #define GPSBaud 9600
 
-#define DEBUG
+// #define DEBUG
 
 MPL3115A2 myPressure;
 
-SoftwareSerial ss(GPSRXPin, GPSTXPin);
+SoftwareSerial ss(GPSTXPin, GPSRXPin);
 TinyGPSPlus gps;
 
 /* Assign a unique ID to the sensors */
@@ -73,6 +73,36 @@ void senderConnect() {
                 return;
             }
         }
+    }
+}
+
+void setupGPS(SoftwareSerial)
+{
+    ss.begin(GPSBaud);
+    Serial.println("GPS started...");
+}
+
+void getGPSPosition(SoftwareSerial &ss, TinyGPSPlus &gps, float* pos)
+{
+#ifdef DEBUG
+    if (ss.available() <= 0)
+    {
+        Serial.println("GPS data not available...");
+    }
+#endif
+
+    while (ss.available() > 0) // As each character arrives...
+    {
+        char t = ss.read();
+        gps.encode(t);
+    }
+
+    // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
+    if (gps.location.isValid())
+    {
+        Serial.println("GPS updated");
+        pos[0] = gps.location.lat();
+        pos[1] = gps.location.lng();
     }
 }
 
@@ -173,19 +203,19 @@ void sendAltitude()
 
 void sendLocation()
 {
-    long loc[2];
+    float loc[2];
     loc[0] = 123.12;
     loc[1] = 0.2;
     // getGPSPosition(ss, gps, loc);
 
-    bytes<long> locByte[2];
+    bytes<float> locByte[2];
     locByte[0].f = loc[0];
     locByte[1].f = loc[1];
-    sendData<long>(locByte, 2, "g");
+    sendData<float>(locByte, 2, "g");
 
     #ifdef DEBUG
-    printDebugData<long>(loc[0], "Latitude: ");
-    printDebugData<long>(loc[1], "Longitude: ");
+    printDebugData<float>(loc[0], "Latitude: ");
+    printDebugData<float>(loc[1], "Longitude: ");
     #endif
 }
 
@@ -221,7 +251,7 @@ void sendIntTest()
 // test sensors
 void testGPS()
 {
-    long gpsPosition[2];
+    float gpsPosition[2];
     getGPSPosition(ss, gps, gpsPosition);
     Serial.print("GPS: ");
     Serial.print(gpsPosition[0]);
@@ -249,7 +279,7 @@ void setup()
     flush();
     Serial.println("Setup started!");
 
-    senderConnect();
+    // senderConnect();
 
     flush();
     delay(500);
@@ -263,9 +293,9 @@ void loop()
     // sendFloatTest();
     // sendLongTest();
     // sendIntTest();
-    sendAltitude();
-    sendLocation();
+    // sendAltitude();
+    // sendLocation();
     // testBaro();
-    // testGPS();
+    testGPS();
     delay(300);
 }

@@ -11,15 +11,15 @@
 
 // #include "Adafruit_GPS.h"
 
-#define RXPin 11
-#define TXPin 10
+#define TXPin 5
+#define RXPin 4
 #define GPSBaud 9600
-#define ConsoleBaud 115200
+#define ConsoleBaud 57600
 
-// #define DEBUG
+#define DEBUG
 
 // The serial connection to the GPS device
-SoftwareSerial ss(RXPin, TXPin);
+SoftwareSerial ss(TXPin, RXPin);
 TinyGPSPlus gps;
 
 void setup()

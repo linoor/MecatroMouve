@@ -28,7 +28,7 @@
 #define IDLE_STEPS 80
 #define CALIBRATION_STEPS 20
 
-// #define DEBUG
+#define DEBUG
 
 
 ///////////////////////////////////////
@@ -41,7 +41,7 @@ float dataCurrent[LOCAL_SIZE];
 
 MPL3115A2 myPressure;
 
-SoftwareSerial ss(GPSRXPin, GPSTXPin);
+SoftwareSerial ss(GPSTXPin, GPSRXPin);
 TinyGPSPlus gps;
 
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
@@ -347,16 +347,67 @@ void calibrateAltitude(float alti)
 }
 
 
+
+
+void setupGPS()
+{
+    ss.begin(GPSBaud);
+    Serial.println("GPS started...");
+}
+
+void getGPSPosition(float* pos)
+{
+#ifdef DEBUG
+    if (ss.available() <= 0)
+    {
+        Serial.println("GPS data not available...");
+    }
+#endif
+
+    while (ss.available() > 0) // As each character arrives...
+    {
+        char t = ss.read();
+        gps.encode(t);
+    }
+
+    // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
+    if (gps.location.isValid())
+    {
+        Serial.println("valid");
+        pos[0] = gps.location.lat();
+        pos[1] = gps.location.lng();
+    }
+}
+
+
 template <typename T>
 T readDataTest()
 {
     bytes<T> received;
+    while (!Serial.available());
     for (int i = 0; i < sizeof(T); i++)
     {
         received.b[i] = Serial.read();
     }
     return received.f;
 }
+
+template <typename T>
+void readDataTest(T* data, int dataSize)
+{
+    bytes<T> received[dataSize];
+    while (!Serial.available());
+    for (int i = 0; i < sizeof(dataSize); i++)
+    {
+        for (int j = 0; j < sizeof(T); j++)
+        {
+            received[i].b[j] = Serial.read();
+        }
+        data[i] = received[i].f;
+    }
+}
+
+float receiverGPS[2];
 
 void readTestData()
 {
@@ -368,7 +419,8 @@ void readTestData()
     // delay(100);
 
     float alti;
-    int32_t gpsPosition[2];
+    // int32_t gpsPosition[2];
+    float gpsData[2];
 
     long testLong;
     int testInt;
@@ -396,12 +448,8 @@ void readTestData()
         break;
     case 'g':
         // receiving gps data
-        Serial.println("g");
-        gpsData = readDataTest<long>();
-        long pos [2];
-        getGPSPosition(ss, gps, pos);
-        Serial.println("gpsData: " + gpsData);
-        Serial.println("gpsPosition: " + pos);
+        // Serial.println("g");
+        // readDataTest(gpsData, 2);
         break;
     case 'l': // test for sending long
         Serial.println("l");
@@ -412,11 +460,12 @@ void readTestData()
         testInt = readDataTest<int>();
         break;
     case 'd':
-        Serial.println("Start looking for end signal");
-        while(Serial.read() != END_SIGNAL){
+        // Serial.println("Start looking for end signal");
+        while (Serial.read() != END_SIGNAL)
+        {
             //Serial.println("Not received yet... going on");
         }
-        Serial.println("Found end signal. Returning");
+        // Serial.println("Found end signal. Returning");
         return;
     default:
         break;
@@ -440,24 +489,53 @@ void readTestData()
         Serial.println(alti);
         Serial.print("Differential: ");
         Serial.println(alti - myAlti - correction);
+
+        // Serial.print("gpsData: ");
+        // Serial.print(gpsData[0]);Serial.print(", ");Serial.println(gpsData[1]);
+
+        receiverGPS[0] = 100;
+        receiverGPS[1] = 200;
+
+        getGPSPosition(ss, gps, receiverGPS);
+        Serial.print("Receiver Location: ");
+        Serial.print(receiverGPS[0]);
+        Serial.print(", ");
+        Serial.println(receiverGPS[1]);
+
     }
 }
 
+void testGPS()
+{
+    float gpsPosition[2];
+    gpsPosition[0] = 300;
+    gpsPosition[1] = 400;
+
+    getGPSPosition(gpsPosition);
+    Serial.print("GPS: ");
+    Serial.print(gpsPosition[0]);
+    Serial.print(", ");
+    Serial.println(gpsPosition[1]);
+}
+
 ////////////////////////////////////////
+
+
 
 void setup()
 {
     Wire.begin();
 
     setupBaro(myPressure);
-    setupGPS(ss);
+    setupGPS();
+    // setupGPS(ss);
     // setupAccMagGyro();
     // setupServo();
 
     Serial.begin(57600);
     flush();
 
-    receiverConnect();
+    // receiverConnect();
 
     flush();
     delay(500);
@@ -477,7 +555,8 @@ void loop() // run over and over
     // moveCamera();
     /*myservoVertical.write(parse_MinMax(57.32*(1.57 - atan(diff_pressure/DISTANCE)), 10, 170));
     */
-    readTestData();
+    // readTestData();
+    testGPS();
     delay(300);
 }
 

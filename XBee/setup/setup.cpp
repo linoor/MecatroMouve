@@ -10,13 +10,13 @@ void setupBaro(MPL3115A2 myPressure)
     myPressure.enableEventFlags();
 }
 
-void setupGPS(SoftwareSerial ss)
+void setupGPS(SoftwareSerial &ss)
 {
     ss.begin(GPSBaud);
     Serial.println("GPS started...");
 }
 
-void getGPSPosition(SoftwareSerial ss, TinyGPSPlus gps, long *pos)
+void getGPSPosition(SoftwareSerial &ss, TinyGPSPlus &gps, float* pos)
 {
 #ifdef DEBUG
     if (ss.available() <= 0)
@@ -34,6 +34,7 @@ void getGPSPosition(SoftwareSerial ss, TinyGPSPlus gps, long *pos)
     // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
     if (gps.location.isValid())
     {
+        Serial.println("GPS updated");
         pos[0] = gps.location.lat();
         pos[1] = gps.location.lng();
     }
