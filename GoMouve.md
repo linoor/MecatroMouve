@@ -44,6 +44,7 @@ Note:
 #### Libraries
 GPS
 * [TinyGPS++](https://github.com/mikalhart/TinyGPSPlus/releases)
+* [Adafruit_GPS]https://github.com/adafruit/Adafruit-GPS-Library
 
 Barometer
 * [MPL3115A2](https://github.com/adafruit/Adafruit_MPL3115A2_Library)
