@@ -44,6 +44,7 @@ Note:
 #### Libraries
 GPS
 * [TinyGPS++](https://github.com/mikalhart/TinyGPSPlus/releases)
+* [Adafruit_GPS]https://github.com/adafruit/Adafruit-GPS-Library
 
 Barometer
 * [MPL3115A2](https://github.com/adafruit/Adafruit_MPL3115A2_Library)
@@ -146,7 +147,7 @@ void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
 The current setting of protocal follows
 * `START_SIGNAL`: s
 * `END_SIGNAL`: e
-* `typeSignal`: i, l, f, a, d (as `int`, `long`, `float`, altitude, debug)
+* `typeSignal`: a, g, d, i, l, f (as altitude, location (2D), debug, `int`, `long`, `float`)
 
 
 ### Moving Camera
@@ -159,4 +160,4 @@ The current setting of protocal follows
 * optimize handshaking
 * redesign start/end protocols for each data transmission
 
-*updated by Eric Chiu 24.02.15*
+*updated by Eric Chiu 07.04.15*
