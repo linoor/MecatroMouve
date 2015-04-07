@@ -44,6 +44,7 @@ Note:
 #### Libraries
 GPS
 * [TinyGPS++](https://github.com/mikalhart/TinyGPSPlus/releases)
+* [Adafruit_GPS]https://github.com/adafruit/Adafruit-GPS-Library
 
 Barometer
 * [MPL3115A2](https://github.com/adafruit/Adafruit_MPL3115A2_Library)
@@ -57,40 +58,42 @@ Barometer
 ### Communication Process
 #### XBee Handshaking
 * In `sender.ino`:
-
-        while (true)
+    ``` cpp
+    while (true)
+    {
+        Serial.print("A");
+        delay(50);
+        while (Serial.available())
         {
-            Serial.print("A");
-            delay(50);
-            while (Serial.available())
+            // Serial.println("Available");
+            if (Serial.read() == 'B')
             {
-                // Serial.println("Available");
-                if (Serial.read() == 'B')
-                {
-                    // Serial.println("Read B");
-                    Serial.println("Setup finished!");
-                    return;
-                }
+                // Serial.println("Read B");
+                Serial.println("Setup finished!");
+                return;
             }
         }
+    }
+    ```
 
 * In `receiver.ino`:
-
-        while (true)
+    ``` cpp
+    while (true)
+    {
+        delay(10);
+        if (Serial.available())
         {
-            delay(10);
-            if (Serial.available())
+            if (Serial.read() == 'A')
             {
-                if (Serial.read() == 'A')
+                for (int i = 0; i < 10; i++)
                 {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        Serial.print("B");
-                    }
-                    return;
+                    Serial.print("B");
                 }
+                return;
             }
         }
+    }
+    ```
 
 1. The *sender* sends out `A` continuously.
 2. Once the *receiver* receives `A`, it returns `B` for 10 times and leaves the session.
@@ -100,6 +103,51 @@ Note:
 * Pass the parameter to `Serial.print`(or `write`) as `string`, while
 
 #### Sending Data
+
+The transmission of data between XBees is facilited with C++ data type `union`.
+
+For example:
+
+```cpp
+union bytes
+{
+    float f;
+    byte b[sizeof(float)];
+}
+```
+
+Variables `f` and `b` actually point to the same memory block (4 bytes in this case), which allows us to manipulate the data as `float` number, and to send data as byte over XBee.
+
+```cpp
+bytes data;
+// manipulation of data
+// e.g. data.f = myPressure.readAltitude();
+
+Serial.write(data.b, sizeof(float));
+```
+
+To handle each ideal data type of the sensor, we thereby implement this part with C++ template.
+
+Each data set should be sent at each refresh with a starting signal, a data type signal, and an ending signal to prevent `receiver` from parsing incorrectly due to data loss.
+
+As in `sendData` function:
+``` cpp
+template <typename T>
+void sendData(bytes<T> dataToSend[], int dataSize, String typeSignal)
+{
+    Serial.print(START_SIGNAL);
+    Serial.print(typeSignal);
+    for (int i = 0; i < dataSize; i++)
+    {
+        Serial.write(dataToSend[i].b, sizeof(T));
+    }
+    Serial.print(END_SIGNAL);
+}
+```
+The current setting of protocal follows
+* `START_SIGNAL`: s
+* `END_SIGNAL`: e
+* `typeSignal`: i, l, f, a, d (as `int`, `long`, `float`, altitude, debug)
 
 
 ### Moving Camera
