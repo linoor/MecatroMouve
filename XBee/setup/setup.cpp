@@ -77,7 +77,7 @@ MagnetometreData readMagnetometre() {
 
   Wire.requestFrom(address, 6);
 
-  MagnetometreData result = MagnetometreData();
+  MagnetometreData result;
 
   if(6<=Wire.available()){
     result.x = Wire.read() << 8; //X msb
