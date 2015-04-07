@@ -220,7 +220,7 @@ void setup()
     Serial.begin(57600);
     flush();
 
-    receiverConnect();
+    //receiverConnect();
 
     flush();
     delay(500);
@@ -228,7 +228,7 @@ void setup()
 
 void loop()
 {
-    // updateMyData();
-    receiveData();
+    updateMyData();
+    //receiveData();
     delay(300);
 }
