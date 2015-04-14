@@ -1,6 +1,4 @@
-#include <stdlib.h>
 #include <Wire.h>
-#include <math.h>
 #include "SoftwareSerial.h"
 #include "MPL3115A2.h"
 #include "Adafruit_GPS.h"
