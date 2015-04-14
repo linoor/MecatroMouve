@@ -132,8 +132,8 @@ void setup()
 
 void loop()
 {
-    sendAltitude();
-    delay(300);
+    // sendAltitude();
+    // delay(300);
     sendLocation();
     // testSensors();
     delay(300);
