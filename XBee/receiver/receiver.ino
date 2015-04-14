@@ -236,7 +236,7 @@ void setup()
     Serial.begin(57600);
     flush();
 
-    //receiverConnect();
+    receiverConnect();
 
     flush();
     delay(500);
