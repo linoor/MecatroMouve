@@ -245,6 +245,6 @@ void setup()
 void loop()
 {
     updateMyData();
-    //receiveData();
+    receiveData();
     delay(300);
 }
