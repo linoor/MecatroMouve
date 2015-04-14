@@ -140,6 +140,22 @@ void printReceivedData()
     Serial.println(receivedLocation[1]);
 }
 
+void updateBearing()
+{
+    if (isInit)
+    {
+        bearing0 = computeBearing(receivedLocation, myLocation);
+        isInit = false;
+    }
+    else
+    {
+        bearing1 = computeBearing(receivedLocation, myLocation);
+        Serial.print("Delta Bearing Angle: ");
+        Serial.println(bearing1 - bearing0);
+        bearing0 = bearing1;
+    }
+}
+
 // receive data from sender
 // parse and update data
 void receiveData()
@@ -152,11 +168,8 @@ void receiveData()
     // delay(100);
 
     char type;
-
     float alti;
     int32_t gpsData[2];
-    long testLong;
-    int testInt;
 
     switch (Serial.read())
     {
@@ -169,20 +182,10 @@ void receiveData()
         type = 'g';
         readData<int32_t>(gpsData, 2);
         break;
-    case 'l': // test for sending long
-        Serial.println("l");
-        testLong = readData<long>();
-        break;
-    case 'i':
-        Serial.println("i");
-        testInt = readData<int>();
-        break;
     case 'd': // debug mode
-        // Serial.println("Start looking for end signal");
         while(Serial.read() != END_SIGNAL)
         {
         }
-        // Serial.println("Found end signal. Returning");
         return;
     default:
         break;
@@ -204,19 +207,7 @@ void receiveData()
         case 'g':
             receivedLocation[0] = gpsData[0];
             receivedLocation[1] = gpsData[1];
-
-            if (isInit)
-            {
-                bearing0 = computeBearing(receivedLocation, myLocation);
-                isInit = false;
-            }
-            else
-            {
-                bearing1 = computeBearing(receivedLocation, myLocation);
-                Serial.print("Delta Bearing Angle: ");
-                Serial.println(bearing1 - bearing0);
-                bearing0 = bearing1;
-            }
+            updateBearing();
             break;
         default:
             break;

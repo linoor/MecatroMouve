@@ -12,7 +12,6 @@ SoftwareSerial ss(GPSTXPin, GPSRXPin);
 Adafruit_GPS GPS(&ss);
 
 bool isInit = true;
-
 bool usingInterrupt = false;
 
 typedef byte uint8_t;

@@ -12,7 +12,7 @@
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
 
-#define SEND_SIZE 1
+// #define SEND_SIZE 1
 
 #define DEBUG
 #define GPSECHO  false
