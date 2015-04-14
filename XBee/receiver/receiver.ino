@@ -10,6 +10,7 @@
 #include "../setup/kalman.cpp"
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
+#include "../setup/bearing.cpp"
 
 #define DISTANCE 3 // en mètres
 #define IDLE_STEPS 80
@@ -28,6 +29,9 @@ int counter = 0;
 float myAlti;
 // double myLocation[2];
 int32_t myLocation[2];
+
+double bearing0;
+double bearing1;
 
 float receivedAlti;
 int32_t receivedLocation[2];
@@ -184,7 +188,6 @@ void receiveData()
         break;
     }
 
-    // delay(100);
     // Wait for END_SIGNAL
     if (Serial.read() != END_SIGNAL)
     {
@@ -201,6 +204,19 @@ void receiveData()
         case 'g':
             receivedLocation[0] = gpsData[0];
             receivedLocation[1] = gpsData[1];
+
+            if (isInit)
+            {
+                bearing0 = computeBearing(receivedLocation, myLocation);
+                isInit = false;
+            }
+            else
+            {
+                bearing1 = computeBearing(receivedLocation, myLocation);
+                Serial.print("Delta Bearing Angle: ");
+                Serial.println(bearing1 - bearing0);
+                bearing0 = bearing1;
+            }
             break;
         default:
             break;
