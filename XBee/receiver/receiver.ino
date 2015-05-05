@@ -221,13 +221,12 @@ void receiveData()
 
 void setup()
 {
+    Serial.begin(57600);
     Wire.begin();
     setupBaro();
     setupGPS();
 
-    Serial.begin(57600);
     flush();
-
     receiverConnect();
 
     flush();

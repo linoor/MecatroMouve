@@ -3,7 +3,6 @@
 #include <math.h>
 #include "SoftwareSerial.h"
 #include "MPL3115A2.h"
-// #include "TinyGPS++.h"
 #include "Adafruit_GPS.h"
 
 #include "../setup/I2C.cpp"
@@ -12,8 +11,6 @@
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
 
-// #define SEND_SIZE 1
-
 #define DEBUG
 #define GPSECHO  false
 
@@ -21,6 +18,7 @@ float mTemperature, mPressure, mAltitude;
 
 
 void senderConnect() {
+    Serial.println("Setup started!");
     while (true)
     {
         Serial.print("A");
@@ -32,7 +30,7 @@ void senderConnect() {
             if (Serial.read() == 'B')
             {
                 // Serial.println("Read B");
-                Serial.println("Setup finished!");
+                Serial.println("\nSetup finished!");
                 return;
             }
         }
@@ -88,7 +86,7 @@ void sendLocation()
     loc[1].f = (int32_t)myLocation[1];
     sendData<int32_t>(loc, 2, "g");
     #ifdef DEBUG
-    printDebugData<String>("Current Location: ");
+    printDebugData<String>("\nCurrent Location: ");
     printDebugData<int32_t>(myLocation[0]);
     printDebugData<int32_t>(myLocation[1]);
     #endif
@@ -100,28 +98,40 @@ void testSensors()
 {
     BMP180_getMeasurements(mTemperature, mPressure, mAltitude);
     float alti = mAltitude;
-    printDebugData<String>("Current Altitude: ");
+    printDebugData<String>("\nCurrent Altitude: ");
     printDebugData<float>(alti);
 
     int32_t myLocation[2];
     getGPSLocation(myLocation);
-    printDebugData<String>("Current Location: ");
+    printDebugData<String>("\nCurrent Location: ");
     printDebugData<int32_t>(myLocation[0]);
     printDebugData<int32_t>(myLocation[1]);
+}
+
+// use this ONLY when Xbee is not connected
+void testSensors_()
+{
+    BMP180_getMeasurements(mTemperature, mPressure, mAltitude);
+    float alti = mAltitude;
+    Serial.println("\nCurrent Altitude: ");
+    Serial.println(alti);
+
+    int32_t myLocation[2];
+    getGPSLocation(myLocation);
+    Serial.println("\nCurrent Location: ");
+    Serial.print(myLocation[0]);Serial.print(", ");
+    Serial.println(myLocation[1]);
 }
 
 
 void setup()
 {
     Serial.begin(57600);
-
     Wire.begin();
     setupBaro();
     setupGPS();
 
     flush();
-    Serial.println("Setup started!");
-
     senderConnect();
 
     flush();
@@ -131,9 +141,9 @@ void setup()
 
 void loop()
 {
-    // sendAltitude();
+    sendAltitude();
     // delay(300);
-    sendLocation();
-    // testSensors();
+    // sendLocation();
+    // testSensors_();
     delay(300);
 }
