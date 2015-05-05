@@ -12,7 +12,7 @@
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
 
-#define SEND_SIZE 1
+// #define SEND_SIZE 1
 
 #define DEBUG
 #define GPSECHO  false
@@ -83,7 +83,6 @@ void sendLocation()
 {
     int32_t myLocation[2];
     getGPSLocation(myLocation);
-
     bytes<int32_t> loc[2];
     loc[0].f = (int32_t)myLocation[0];
     loc[1].f = (int32_t)myLocation[1];

@@ -1,4 +1,6 @@
+#include <stdlib.h>
 #include <Wire.h>
+#include <math.h>
 #include "SoftwareSerial.h"
 #include "MPL3115A2.h"
 #include "Adafruit_GPS.h"
@@ -8,6 +10,7 @@
 #include "../setup/kalman.cpp"
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
+#include "../setup/bearing.cpp"
 
 #define DISTANCE 3 // en mètres
 #define IDLE_STEPS 80
@@ -26,6 +29,9 @@ int counter = 0;
 float myAlti;
 // double myLocation[2];
 int32_t myLocation[2];
+
+double bearing0;
+double bearing1;
 
 float receivedAlti;
 int32_t receivedLocation[2];
@@ -134,6 +140,23 @@ void printReceivedData()
     Serial.println(receivedLocation[1]);
 }
 
+void updateBearing()
+{
+    if (!isInit)
+    {
+        bearing0 = computeBearing(receivedLocation, myLocation);
+        isInit = true;
+        Serial.print("Bearing initialized");
+    }
+    else
+    {
+        bearing1 = computeBearing(receivedLocation, myLocation);
+        Serial.print("Delta Bearing Angle: ");
+        Serial.println(bearing1 - bearing0);
+        bearing0 = bearing1;
+    }
+}
+
 // receive data from sender
 // parse and update data
 void receiveData()
@@ -146,11 +169,8 @@ void receiveData()
     // delay(100);
 
     char type;
-
     float alti;
     int32_t gpsData[2];
-    long testLong;
-    int testInt;
 
     switch (Serial.read())
     {
@@ -163,26 +183,15 @@ void receiveData()
         type = 'g';
         readData<int32_t>(gpsData, 2);
         break;
-    case 'l': // test for sending long
-        Serial.println("l");
-        testLong = readData<long>();
-        break;
-    case 'i':
-        Serial.println("i");
-        testInt = readData<int>();
-        break;
     case 'd': // debug mode
-        // Serial.println("Start looking for end signal");
         while(Serial.read() != END_SIGNAL)
         {
         }
-        // Serial.println("Found end signal. Returning");
         return;
     default:
         break;
     }
 
-    // delay(100);
     // Wait for END_SIGNAL
     if (Serial.read() != END_SIGNAL)
     {
@@ -199,6 +208,7 @@ void receiveData()
         case 'g':
             receivedLocation[0] = gpsData[0];
             receivedLocation[1] = gpsData[1];
+            updateBearing();
             break;
         default:
             break;
