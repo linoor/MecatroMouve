@@ -11,7 +11,7 @@ SoftwareSerial ss(GPSTXPin, GPSRXPin);
 // TinyGPSPlus gps;
 Adafruit_GPS GPS(&ss);
 
-bool isInit = true;
+bool isInit = false;
 
 bool usingInterrupt = false;
 

@@ -205,10 +205,11 @@ void receiveData()
             receivedLocation[0] = gpsData[0];
             receivedLocation[1] = gpsData[1];
 
-            if (isInit)
+            if (!isInit)
             {
                 bearing0 = computeBearing(receivedLocation, myLocation);
-                isInit = false;
+                isInit = true;
+                Serial.print("Bearing initialized");
             }
             else
             {
@@ -236,7 +237,7 @@ void setup()
     Serial.begin(57600);
     flush();
 
-    //receiverConnect();
+    receiverConnect();
 
     flush();
     delay(500);
@@ -245,6 +246,6 @@ void setup()
 void loop()
 {
     updateMyData();
-    //receiveData();
+    receiveData();
     delay(300);
 }

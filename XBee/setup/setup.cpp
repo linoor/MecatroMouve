@@ -89,6 +89,8 @@ void getGPSLocation(int32_t* location)
     {
         location[0] = GPS.latitude_fixed;
         location[1] = GPS.longitude_fixed;
+        Serial.print("Number of satellites: ");
+        Serial.println(GPS.satellites);
     }
     else
     {
