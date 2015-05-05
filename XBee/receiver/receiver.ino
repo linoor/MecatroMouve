@@ -142,10 +142,11 @@ void printReceivedData()
 
 void updateBearing()
 {
-    if (isInit)
+    if (!isInit)
     {
         bearing0 = computeBearing(receivedLocation, myLocation);
-        isInit = false;
+        isInit = true;
+        Serial.print("Bearing initialized");
     }
     else
     {
