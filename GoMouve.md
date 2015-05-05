@@ -25,7 +25,7 @@ For *sender* and *receiver*, the following devices are required:
 * ~~9DOF * 1~~
 * ~~Servo * 2~~
 
-*Current models: [XBee & shield](http://www.cooking-hacks.com/shop/arduino/arduino-xbee-802-15-4), [GPS](http://www.adafruit.com/product/746), [Barometer](http://www.adafruit.com/product/1893) (w/o* ***3Vo*** *pin), [9DOF](http://www.adafruit.com/product/1714), [Servo](http://www.miniplanes.fr/servos/tower-pro/mini-servo-9g-towerpro-sg90-p-2995.html)*
+*Current models: [XBee & shield](http://www.cooking-hacks.com/shop/arduino/arduino-xbee-802-15-4), [GPS](http://www.adafruit.com/product/746), [Barometer](http://www.adafruit.com/product/1893), [9DOF](http://www.adafruit.com/product/1714), [Servo](http://www.miniplanes.fr/servos/tower-pro/mini-servo-9g-towerpro-sg90-p-2995.html)*
 
 #### Wiring
 ##### Sender
@@ -49,7 +49,7 @@ Note:
 
 #### Required Libraries
 GPS
-* [TinyGPS++](https://github.com/mikalhart/TinyGPSPlus/releases)
+* ~~[TinyGPS++](https://github.com/mikalhart/TinyGPSPlus/releases)~~
 * [Adafruit_GPS](https://github.com/adafruit/Adafruit-GPS-Library)
 
 Barometer
@@ -164,6 +164,5 @@ The current setting of protocal follows
 ## TODO
 * moving camera part (barometer first, then self-calibration of receiver, and finally with GPS location)
 * optimize handshaking
-* redesign start/end protocols for each data transmission
 
-*updated by Eric Chiu 07.04.15*
+*updated by Eric Chiu 05.05.15*
