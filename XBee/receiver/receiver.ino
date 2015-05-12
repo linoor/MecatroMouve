@@ -30,11 +30,13 @@ float myAlti;
 // double myLocation[2];
 int32_t myLocation[2];
 
-double bearing0;
-double bearing1;
-
 float receivedAlti;
 int32_t receivedLocation[2];
+
+double bearing0, bearing1;
+double verti0, verti1;
+
+double bearingAngle, verticalAngle;
 
 
 // establish connection with sender
@@ -73,32 +75,45 @@ void updateMyData()
     Serial.println(myLocation[1]);
 }
 
-////////////////////////////////////////
+/// Update angles the motors should turn ///
 
-void calibrateAltitude(float alti)
+void updateBearing()
 {
-    Serial.println(counter);
-
-    if (counter < IDLE_STEPS)
+    if (!isBearingInit)
     {
-        counter++;
+        bearing0 = computeBearing(receivedLocation, myLocation);
+        isBearingInit = true;
+        Serial.print("Bearing initialized");
     }
-    else {
-        if (counter - IDLE_STEPS < CALIBRATION_STEPS)
-        {
-            correction += (alti - myAlti);
-            counter++;
-        }
-        else if (counter - IDLE_STEPS == CALIBRATION_STEPS)
-        {
-            correction = correction / CALIBRATION_STEPS;
-            counter++;
-            // Serial.println(correction);
-        }
+    else
+    {
+        bearing1 = computeBearing(receivedLocation, myLocation);
+        Serial.print("Delta Bearing Angle: ");
+        Serial.println(bearing1 - bearing0);
+        bearingAngle = bearing1 - bearing0;
+        bearing0 = bearing1;
     }
 }
 
-////////// Receiving sender data //////////
+void updateVertical()
+{
+    if (!isVertiInit)
+    {
+        verti0 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        isVertiInit = true;
+        Serial.print("Vertical initialized");
+    }
+    else
+    {
+        verti1 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        Serial.print("Delta Vertical Bearing Angle: ");
+        Serial.println(verti1 - verti0);
+        verticalAngle = verti1 - verti0;
+        verti0 = verti1;
+    }
+}
+
+////////// Receiving sender data ///////////
 
 // after parsing START_SIGNAL and TYPE_SIGNAL
 // read datum of type @T (byte by byte), then return it
@@ -140,23 +155,6 @@ void printReceivedData()
     Serial.println(receivedLocation[1]);
 }
 
-void updateBearing()
-{
-    if (!isInit)
-    {
-        bearing0 = computeBearing(receivedLocation, myLocation);
-        isInit = true;
-        Serial.print("Bearing initialized");
-    }
-    else
-    {
-        bearing1 = computeBearing(receivedLocation, myLocation);
-        Serial.print("Delta Bearing Angle: ");
-        Serial.println(bearing1 - bearing0);
-        bearing0 = bearing1;
-    }
-}
-
 // receive data from sender
 // parse and update data
 void receiveData()
@@ -184,9 +182,7 @@ void receiveData()
         readData<int32_t>(gpsData, 2);
         break;
     case 'd': // debug mode
-        while(Serial.read() != END_SIGNAL)
-        {
-        }
+        while(Serial.read() != END_SIGNAL) {}
         return;
     default:
         break;
@@ -208,12 +204,13 @@ void receiveData()
         case 'g':
             receivedLocation[0] = gpsData[0];
             receivedLocation[1] = gpsData[1];
-            updateBearing();
             break;
         default:
             break;
         }
-        printReceivedData();
+        updateBearing();
+        updateVertical();
+        // printReceivedData();
     }
 }
 
