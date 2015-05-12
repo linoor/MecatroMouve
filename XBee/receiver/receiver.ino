@@ -2,7 +2,6 @@
 #include <Wire.h>
 #include <math.h>
 #include "SoftwareSerial.h"
-#include "MPL3115A2.h"
 #include "Adafruit_GPS.h"
 
 #include "../setup/I2C.cpp"
@@ -52,7 +51,7 @@ void receiverConnect()
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    Serial.print("B");
+                    Serial.println("B");
                 }
                 return;
             }
@@ -63,7 +62,7 @@ void receiverConnect()
 // update data of receiver itself
 void updateMyData()
 {
-    Serial.print("Updating my data...");
+    Serial.print("Updating my data... \nAltitude: ");
     BMP180_getMeasurements(mTemperature, mPressure, mAltitude);
     Serial.println(mAltitude);
 
@@ -161,6 +160,7 @@ void updateBearing()
 // parse and update data
 void receiveData()
 {
+    Serial.println("Reading incoming data...");
     if (!Serial.available()) return;
 
     while (Serial.read() != START_SIGNAL)
@@ -215,6 +215,7 @@ void receiveData()
         }
         printReceivedData();
     }
+    Serial.println("Finished");
 }
 
 ////////////////////////////////////////
@@ -222,10 +223,11 @@ void receiveData()
 void setup()
 {
     Wire.begin();
+    Serial.begin(57600);
+    Serial.println("Setting up...");
     setupBaro();
     setupGPS();
 
-    Serial.begin(57600);
     flush();
 
     receiverConnect();

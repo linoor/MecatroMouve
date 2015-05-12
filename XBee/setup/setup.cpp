@@ -24,6 +24,7 @@ void flush()
 // setup "myPressure" variable for barometer
 void setupBaro()
 {
+    Serial.println("Setting up barometer");
     BMP180_Init(OverSample);
     if (I2C_Read(BMP180_ADDRESS, BMP180_ID) == 0x55)
     {
@@ -46,11 +47,13 @@ void setupBaro()
 
 void setupGPS()
 {
+    Serial.println("Setting up GPS");
     GPS.begin(GPSBaud);
     GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
     GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
     GPS.sendCommand(PGCMD_ANTENNA);
     useInterrupt(true);
+    Serial.println("GPS ready");
 }
 
 // Interrupt is called once a millisecond, looks for any new GPS data, and stores it
