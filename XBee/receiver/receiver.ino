@@ -118,7 +118,6 @@ void updateVertical()
         verti0 = verti1;
     }
 }
-
 ////////// Receiving sender data ///////////
 
 // after parsing START_SIGNAL and TYPE_SIGNAL
