@@ -230,8 +230,12 @@ void receiveData()
 }
 
 void sendMoteurCommand() {
-    // testing
-    camera_Roll += 1;
+    MagnetometreData magnetometre_data = readMagnetometre();
+    Alex_createPackage(
+        magnetometre_data.x,
+        magnetometre_data.y,
+        magnetometre_data.z
+        );
 }
 
 ////////////////////////////////////////
