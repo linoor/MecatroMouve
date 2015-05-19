@@ -40,8 +40,6 @@ void setupBaro()
     kalman_state altitude_state;
 }
 
-
-
 //////////////// GPS setting ////////////////
 // **copied from Adafruit_GPS parse example**
 
@@ -80,7 +78,7 @@ void getGPSLocation(int32_t* location)
     if (GPS.newNMEAreceived()) {
         // a tricky thing here is if we print the NMEA sentence, or data
         // we end up not listening and catching other sentences!
-        // so be very wary if using OUTPUT_ALLDATA and trytng to print out data
+        // so be very wary if using OUTPUT_ALLDATA and trying to print out data
         //Serial.println(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
 
         if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
@@ -88,16 +86,16 @@ void getGPSLocation(int32_t* location)
     }
 
     // Serial.print("Fix: "); Serial.print((int)GPS.fix);
+    //Serial.print("Number of satellites: ");
+    //Serial.println(GPS.satellites);
     if (GPS.fix)
     {
         location[0] = GPS.latitude_fixed;
         location[1] = GPS.longitude_fixed;
-        Serial.print("Number of satellites: ");
-        Serial.println(GPS.satellites);
     }
     else
     {
-        Serial.println("skip GPS update...");
+        //Serial.println("skip GPS update...");
     }
 
     // Serial.print("Location: ");
@@ -107,33 +105,3 @@ void getGPSLocation(int32_t* location)
 }
 
 void getGPSLocation(double* location) {}
-/*
-void getGPSLocation(double* location)
-{
-#ifdef DEBUG
-    if (ss.available() <= 0)
-    {
-        Serial.println("GPS data not available...");
-    }
-#endif
-
-    while (ss.available() > 0) // As each character arrives...
-    {
-        char t = ss.read();
-        gps.encode(t);
-    }
-
-    // if (gps.location.isUpdated() || gps.altitude.isUpdated()) {
-    if (gps.location.isValid())
-    {
-        // Serial.println("valid");
-        location[0] = gps.location.lat();
-        location[1] = gps.location.lng();
-    }
-    else
-    {
-        location[0] = 0;
-        location[1] = 0;
-    }
-}
-*/
