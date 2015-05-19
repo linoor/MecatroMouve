@@ -9,6 +9,8 @@
 #define KALMAN_H
     kalman_state altitude_state;
 #endif
+    
+#define address 0x1E //0011110b, I2C 7bit address of HMC5883
 
 byte OverSample = 0;
 
