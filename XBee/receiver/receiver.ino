@@ -37,6 +37,7 @@ double bearing0, bearing1;
 double verti0, verti1;
 
 double bearingAngle, verticalAngle;
+double bearingAngle_north, verticalAngle_north;
 
 
 // establish connection with sender
@@ -81,15 +82,17 @@ void updateMyData()
 
 void updateBearing()
 {
+    bear = computeBearing(receivedLocation, myLocation);
+    bearingAngle_north = bear;
     if (!isBearingInit)
     {
-        bearing0 = computeBearing(receivedLocation, myLocation);
+        bearing0 = bear;
         isBearingInit = true;
         Serial.print("Bearing initialized");
     }
     else
     {
-        bearing1 = computeBearing(receivedLocation, myLocation);
+        bearing1 = bear;
         Serial.print("Delta Bearing Angle: ");
         Serial.println(bearing1 - bearing0);
         bearingAngle = bearing1 - bearing0;
@@ -99,16 +102,18 @@ void updateBearing()
 
 void updateVertical()
 {
+    verti = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+    verticalAngle_north = verti;
     if (!isVertiInit)
     {
         Serial.println("Initializing vertical");
-        verti0 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        verti0 = verti;
         isVertiInit = true;
         Serial.print("Vertical initialized");
     }
     else
     {
-        verti1 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        verti1 = verti;
         Serial.print("Delta Vertical Bearing Angle: ");
         Serial.println(verti1 - verti0);
         verticalAngle = verti1 - verti0;
