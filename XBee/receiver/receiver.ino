@@ -172,7 +172,7 @@ void printReceivedData()
 void receiveData()
 {
     Serial.println("Reading incoming data...");
-    if (!Serial.available()) return;
+    while (!Serial.available());
 
     while (Serial.read() != START_SIGNAL)
     {
@@ -294,5 +294,4 @@ void loop()
     receiveData();
     testMoteurCommand();
     // sendMoteurCommand();
-    delay(200);
 }

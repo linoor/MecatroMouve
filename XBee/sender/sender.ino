@@ -3,7 +3,7 @@
 #include <math.h>
 #include "SoftwareSerial.h"
 #include "Adafruit_GPS.h"
-
+#include <elapsedMillis.h>
 #include "../setup/I2C.cpp"
 #include "../setup/BMP180.cpp"
 #include "../setup/kalman.cpp"
@@ -14,6 +14,8 @@
 #define GPSECHO  false
 
 float mTemperature, mPressure, mAltitude;
+elapsedMillis timeElapsedAlt, timeElapsedLocation;
+long refreshAlt, refreshLocation;
 
 
 void senderConnect() {
@@ -136,13 +138,20 @@ void setup()
     flush();
     delay(500);
     flush();
+    refreshAlt = 300;
+    refreshLocation = 100;
 }
 
 void loop()
 {
-    sendAltitude();
+    
+    if(timeElapsedAlt > refreshAlt){
+        sendAltitude();
+        timeElapsedAlt = 0;
+    }
     // delay(300);
-    // sendLocation();
+    if(timeElapsedLocation > refreshLocation){
+        sendLocation();  
+    }
     // testSensors_();
-    delay(300);
 }
