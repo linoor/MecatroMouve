@@ -4,6 +4,8 @@
 #include "SoftwareSerial.h"
 #include "Adafruit_GPS.h"
 
+#include <inttypes.h>
+
 #include "../setup/I2C.cpp"
 #include "../setup/BMP180.cpp"
 #include "../setup/kalman.cpp"
