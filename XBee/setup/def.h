@@ -2,7 +2,7 @@
 #define DEF_H
 #define GPSRXPin 4
 #define GPSTXPin 5
-#define GPSBaud 9600
+#define GPSBaud 9600 // cf documentation
 #define START_SIGNAL 's'
 #define END_SIGNAL 'e'
 #define FLOAT_SIZE sizeof(float)
@@ -11,7 +11,8 @@ SoftwareSerial ss(GPSTXPin, GPSRXPin);
 // TinyGPSPlus gps;
 Adafruit_GPS GPS(&ss);
 
-bool isInit = false;
+bool isBearingInit = false;
+bool isVertiInit = false;
 
 bool usingInterrupt = false;
 

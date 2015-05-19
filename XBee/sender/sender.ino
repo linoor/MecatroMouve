@@ -2,7 +2,6 @@
 #include <Wire.h>
 #include <math.h>
 #include "SoftwareSerial.h"
-#include "MPL3115A2.h"
 #include "Adafruit_GPS.h"
 
 #include "../setup/I2C.cpp"
