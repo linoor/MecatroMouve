@@ -87,7 +87,7 @@ void updateMyData()
 
 void updateBearing()
 {
-    bear = computeBearing(receivedLocation, myLocation);
+    double bear = computeBearing(receivedLocation, myLocation);
     // bearingAngle_north = bear + myMagData.x;
     if (!isBearingInit)
     {
@@ -107,7 +107,7 @@ void updateBearing()
 
 void updateVertical()
 {
-    verti = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+    double verti = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
     // verticalAngle_north = verti + myMagData.y;
     if (!isVertiInit)
     {
@@ -237,27 +237,27 @@ void receiveData()
     Serial.println("Finished");
 }
 
-int count;
-int x = -90, y = -90, z = -90;
+int count = 0;
+int x = -45, y = -45, z = -45;
 
 void testMoteurCommand() {
     count++;
-    if (count > 50)
+    if (count > 100)
     {
-        if ((count-50)/50 < 1)
+        if (count < 200)
         {
-            x += 3;
+            x += 1;
         }
-        else if ((count-50)/50 < 2)
+        else if (count > 250 && count < 350)
         {
-            y += 3;
+            y += 1;
         }
-        else if ((count-50)/50 < 3)
+        else if (count > 400 && count < 500)
         {
-            z += 3;
+            z += 1;
         }
-        Alex_createPackage(x,y,z);
     }
+    Alex_createPackage(x,y,z);
 }
 
 void sendMoteurCommand() {
@@ -281,7 +281,10 @@ void setup()
 
     flush();
     receiverConnect();
+    
     Alex_createPackage(-90, -90, -90);
+    updateTime = 200;
+
     flush();
     delay(500);
 }
