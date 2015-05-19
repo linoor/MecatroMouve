@@ -10,6 +10,7 @@
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
 #include "../setup/bearing.cpp"
+#include "../moteur/Alexmos.h"
 
 #define DISTANCE 3 // en mètres
 #define IDLE_STEPS 80
@@ -225,6 +226,11 @@ void receiveData()
     Serial.println("Finished");
 }
 
+void sendMoteurCommand() {
+    // testing
+    camera_Roll += 1;
+}
+
 ////////////////////////////////////////
 
 void setup()
@@ -245,5 +251,6 @@ void setup()
 void loop()
 {
     receiveData();
+    sendMoteurCommand();
     delay(200);
 }
