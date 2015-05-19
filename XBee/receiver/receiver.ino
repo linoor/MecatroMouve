@@ -4,6 +4,8 @@
 #include "SoftwareSerial.h"
 #include "Adafruit_GPS.h"
 
+#include <inttypes.h>
+
 #include "../setup/I2C.cpp"
 #include "../setup/BMP180.cpp"
 #include "../setup/kalman.cpp"
@@ -12,6 +14,7 @@
 #include "../setup/bearing.cpp"
 #include "../moteur/Alexmos.h"
 
+#define address 0x1E //0011110b, I2C 7bit address of HMC5883
 #define DISTANCE 3 // en mètres
 #define IDLE_STEPS 80
 #define CALIBRATION_STEPS 20
@@ -232,8 +235,12 @@ void receiveData()
 }
 
 void sendMoteurCommand() {
-    // testing
-    camera_Roll += 1;
+    MagnetometreData magnetometre_data = readMagnetometre();
+    Alex_createPackage(
+        magnetometre_data.x,
+        magnetometre_data.y,
+        magnetometre_data.z
+        );
 }
 
 ////////////////////////////////////////
