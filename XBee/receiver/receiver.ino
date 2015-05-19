@@ -36,10 +36,13 @@ int32_t myLocation[2];
 float receivedAlti;
 int32_t receivedLocation[2];
 
+MagnetometreData myMagData;
+
 double bearing0, bearing1;
 double verti0, verti1;
 
 double bearingAngle, verticalAngle;
+double bearingAngle_north, verticalAngle_north;
 
 
 // establish connection with sender
@@ -84,15 +87,17 @@ void updateMyData()
 
 void updateBearing()
 {
+    bear = computeBearing(receivedLocation, myLocation);
+    // bearingAngle_north = bear + myMagData.x;
     if (!isBearingInit)
     {
-        bearing0 = computeBearing(receivedLocation, myLocation);
+        bearing0 = bear;
         isBearingInit = true;
         Serial.print("Bearing initialized");
     }
     else
     {
-        bearing1 = computeBearing(receivedLocation, myLocation);
+        bearing1 = bear;
         Serial.print("Delta Bearing Angle: ");
         Serial.println(bearing1 - bearing0);
         bearingAngle = bearing1 - bearing0;
@@ -102,16 +107,18 @@ void updateBearing()
 
 void updateVertical()
 {
+    verti = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+    // verticalAngle_north = verti + myMagData.y;
     if (!isVertiInit)
     {
         Serial.println("Initializing vertical");
-        verti0 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        verti0 = verti;
         isVertiInit = true;
         Serial.print("Vertical initialized");
     }
     else
     {
-        verti1 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        verti1 = verti;
         Serial.print("Delta Vertical Bearing Angle: ");
         Serial.println(verti1 - verti0);
         verticalAngle = verti1 - verti0;
@@ -222,10 +229,35 @@ void receiveData()
         }
         updateMyData();
         printReceivedData();
+
+        myMagData = readMagnetometre();
         updateBearing();
         updateVertical();
     }
     Serial.println("Finished");
+}
+
+int count;
+int x = -90, y = -90, z = -90;
+
+void testMoteurCommand() {
+    count++;
+    if (count > 50)
+    {
+        if ((count-50)/50 < 1)
+        {
+            x += 3;
+        }
+        else if ((count-50)/50 < 2)
+        {
+            y += 3;
+        }
+        else if ((count-50)/50 < 3)
+        {
+            z += 3;
+        }
+        Alex_createPackage(x,y,z);
+    }
 }
 
 void sendMoteurCommand() {
@@ -249,7 +281,7 @@ void setup()
 
     flush();
     receiverConnect();
-
+    Alex_createPackage(-90, -90, -90);
     flush();
     delay(500);
 }
@@ -257,6 +289,7 @@ void setup()
 void loop()
 {
     receiveData();
-    sendMoteurCommand();
+    testMoteurCommand();
+    // sendMoteurCommand();
     delay(200);
 }
