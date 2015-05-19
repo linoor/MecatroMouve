@@ -1,6 +1,7 @@
+#include <stdlib.h>
 #include <Wire.h>
+#include <math.h>
 #include "SoftwareSerial.h"
-#include "MPL3115A2.h"
 #include "Adafruit_GPS.h"
 
 #include "../setup/I2C.cpp"
@@ -8,6 +9,7 @@
 #include "../setup/kalman.cpp"
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
+#include "../setup/bearing.cpp"
 
 #define address 0x1E //0011110b, I2C 7bit address of HMC5883
 #define DISTANCE 3 // en mètres
@@ -31,6 +33,11 @@ int32_t myLocation[2];
 float receivedAlti;
 int32_t receivedLocation[2];
 
+double bearing0, bearing1;
+double verti0, verti1;
+
+double bearingAngle, verticalAngle;
+
 
 // establish connection with sender
 void receiverConnect()
@@ -47,7 +54,7 @@ void receiverConnect()
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    Serial.print("B");
+                    Serial.println("B");
                 }
                 return;
             }
@@ -58,42 +65,58 @@ void receiverConnect()
 // update data of receiver itself
 void updateMyData()
 {
-    Serial.print("Updating my data...");
+    Serial.print("Updating my data... \nMy Altitude: ");
     BMP180_getMeasurements(mTemperature, mPressure, mAltitude);
     Serial.println(mAltitude);
 
     getGPSLocation(myLocation);
+    Serial.print("My location: ");
     Serial.print(myLocation[0]);
     Serial.print(" ");
     Serial.println(myLocation[1]);
+    Serial.println("Finished updating my data");
 }
 
-////////////////////////////////////////
+/// Update angles the motors should turn ///
 
-void calibrateAltitude(float alti)
+void updateBearing()
 {
-    Serial.println(counter);
-
-    if (counter < IDLE_STEPS)
+    if (!isBearingInit)
     {
-        counter++;
+        bearing0 = computeBearing(receivedLocation, myLocation);
+        isBearingInit = true;
+        Serial.print("Bearing initialized");
     }
-    else {
-        if (counter - IDLE_STEPS < CALIBRATION_STEPS)
-        {
-            correction += (alti - myAlti);
-            counter++;
-        }
-        else if (counter - IDLE_STEPS == CALIBRATION_STEPS)
-        {
-            correction = correction / CALIBRATION_STEPS;
-            counter++;
-            // Serial.println(correction);
-        }
+    else
+    {
+        bearing1 = computeBearing(receivedLocation, myLocation);
+        Serial.print("Delta Bearing Angle: ");
+        Serial.println(bearing1 - bearing0);
+        bearingAngle = bearing1 - bearing0;
+        bearing0 = bearing1;
     }
 }
 
-////////// Receiving sender data //////////
+void updateVertical()
+{
+    if (!isVertiInit)
+    {
+        Serial.println("Initializing vertical");
+        verti0 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        isVertiInit = true;
+        Serial.print("Vertical initialized");
+    }
+    else
+    {
+        verti1 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        Serial.print("Delta Vertical Bearing Angle: ");
+        Serial.println(verti1 - verti0);
+        verticalAngle = verti1 - verti0;
+        verti0 = verti1;
+    }
+}
+
+////////// Receiving sender data ///////////
 
 // after parsing START_SIGNAL and TYPE_SIGNAL
 // read datum of type @T (byte by byte), then return it
@@ -139,6 +162,7 @@ void printReceivedData()
 // parse and update data
 void receiveData()
 {
+    Serial.println("Reading incoming data...");
     if (!Serial.available()) return;
 
     while (Serial.read() != START_SIGNAL)
@@ -147,13 +171,14 @@ void receiveData()
     // delay(100);
 
     char type;
-
     float alti;
     int32_t gpsData[2];
-    long testLong;
-    int testInt;
+    char r;
+    r=Serial.read();
+    Serial.println("Read data: ");
+    Serial.println(r);
 
-    switch (Serial.read())
+    switch (r)
     {
     case 'a':
         type = 'a';
@@ -164,26 +189,14 @@ void receiveData()
         type = 'g';
         readData<int32_t>(gpsData, 2);
         break;
-    case 'l': // test for sending long
-        Serial.println("l");
-        testLong = readData<long>();
-        break;
-    case 'i':
-        Serial.println("i");
-        testInt = readData<int>();
-        break;
     case 'd': // debug mode
-        // Serial.println("Start looking for end signal");
-        while(Serial.read() != END_SIGNAL)
-        {
-        }
-        // Serial.println("Found end signal. Returning");
+        while(Serial.read() != END_SIGNAL) {}
         return;
     default:
         break;
     }
 
-    // delay(100);
+
     // Wait for END_SIGNAL
     if (Serial.read() != END_SIGNAL)
     {
@@ -202,24 +215,29 @@ void receiveData()
             receivedLocation[1] = gpsData[1];
             break;
         default:
+
             break;
         }
+        updateMyData();
         printReceivedData();
+        updateBearing();
+        updateVertical();
     }
+    Serial.println("Finished");
 }
 
 ////////////////////////////////////////
 
 void setup()
 {
+    Serial.begin(57600);
     Wire.begin();
+    Serial.println("Setting up...");
     setupBaro();
     setupGPS();
 
-    Serial.begin(57600);
     flush();
-
-    //receiverConnect();
+    receiverConnect();
 
     flush();
     delay(500);
@@ -227,7 +245,6 @@ void setup()
 
 void loop()
 {
-    updateMyData();
-    //receiveData();
-    delay(300);
+    receiveData();
+    delay(200);
 }
