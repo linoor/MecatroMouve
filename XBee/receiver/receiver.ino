@@ -12,6 +12,7 @@
 #include "../setup/bearing.cpp"
 #include "../moteur/Alexmos.h"
 
+#define address 0x1E //0011110b, I2C 7bit address of HMC5883
 #define DISTANCE 3 // en mètres
 #define IDLE_STEPS 80
 #define CALIBRATION_STEPS 20
