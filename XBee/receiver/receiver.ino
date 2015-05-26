@@ -87,8 +87,8 @@ void updateMyData()
 
 void updateBearing()
 {
-    bear = computeBearing(receivedLocation, myLocation);
-    // bearingAngle_north = bear + myMagData.x;
+    double bear = computeBearing(receivedLocation, myLocation);
+    bearingAngle_north = bear;// + myMagData.x;
     if (!isBearingInit)
     {
         bearing0 = bear;
@@ -98,8 +98,8 @@ void updateBearing()
     else
     {
         bearing1 = bear;
-        Serial.print("Delta Bearing Angle: ");
-        Serial.println(bearing1 - bearing0);
+        // Serial.print("Delta Bearing Angle: ");
+        // Serial.println(bearing1 - bearing0);
         bearingAngle = bearing1 - bearing0;
         bearing0 = bearing1;
     }
@@ -107,8 +107,8 @@ void updateBearing()
 
 void updateVertical()
 {
-    verti = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
-    // verticalAngle_north = verti + myMagData.y;
+    double verti = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+    verticalAngle_north = verti;// + myMagData.y;
     if (!isVertiInit)
     {
         Serial.println("Initializing vertical");
@@ -238,35 +238,35 @@ void receiveData()
     Serial.println("Finished");
 }
 
-int count;
+int count = 0;
 int x = -90, y = -90, z = -90;
+int initCount = 0;
 
 void testMoteurCommand() {
-    count++;
-    if (count > 50)
+    if (initCount > 10)
     {
-        if ((count-50)/50 < 1)
-        {
-            x += 3;
-        }
-        else if ((count-50)/50 < 2)
-        {
-            y += 3;
-        }
-        else if ((count-50)/50 < 3)
-        {
-            z += 3;
-        }
-        Alex_createPackage(x,y,z);
+        count += 5;
+        // receivedLocation[0] = int32_t((48.0000 + 0.001 * count) * 10000000);
+        receivedLocation[0] = int32_t((48.0000 + 0.0001 * cos(count*PI/180)) * 10000000);
+        receivedLocation[1] = int32_t((2.0000 + 0.0001 * sin(count*PI/180)) * 10000000);
+        // Serial.print(receivedLocation[0]);Serial.print(" ");Serial.println(receivedLocation[1]);
     }
+    else {
+        initCount++;
+    }
+    updateBearing();
+    Serial.println(bearingAngle_north);
+    // updateVertical();
 }
 
 void sendMoteurCommand() {
-    MagnetometreData magnetometre_data = readMagnetometre();
+    // MagnetometreData magnetometre_data = readMagnetometre();
+    // Serial.print("bearing angle: ");Serial.println(bearingAngle_north);
+    // Serial.println(bearingAngle_north * 180 / PI);
     Alex_createPackage(
-        magnetometre_data.x,
-        magnetometre_data.y,
-        magnetometre_data.z
+        0,
+        0,
+        int(bearingAngle_north)
         );
 }
 
@@ -274,23 +274,29 @@ void sendMoteurCommand() {
 
 void setup()
 {
-    Serial.begin(57600);
+    Serial.begin(9600);
     Wire.begin();
     Serial.println("Setting up...");
+    portAlex.begin(9600);
     setupBaro();
     setupGPS();
 
     flush();
-    receiverConnect();
-    Alex_createPackage(-90, -90, -90);
+    // receiverConnect();
+    receivedLocation[0] = myLocation[0] = 48 * 10000000;
+    myLocation[1] = 2 * 10000000;
+    receivedLocation[1] = 2.001 * 10000000;
+    bearingAngle_north = 0;
+
+    Alex_createPackage(0, 0, 0);
     flush();
     delay(500);
 }
 
 void loop()
 {
-    receiveData();
+    // receiveData();
     testMoteurCommand();
-    // sendMoteurCommand();
+    sendMoteurCommand();
     delay(200);
 }

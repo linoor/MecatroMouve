@@ -9,6 +9,8 @@
 #define END_SIGNAL 'e'
 #define FLOAT_SIZE sizeof(float)
 
+#define PI 3.141592654
+
 SoftwareSerial ss(GPSTXPin, GPSRXPin);
 SoftwareSerial portAlex(AlexRX, AlexTX);
 // TinyGPSPlus gps;
