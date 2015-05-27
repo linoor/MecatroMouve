@@ -21,6 +21,8 @@ bool isVertiInit = false;
 
 bool usingInterrupt = false;
 
+int bearingState = 1;
+
 typedef byte uint8_t;
 
 template <typename T>

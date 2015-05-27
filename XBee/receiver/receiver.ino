@@ -85,26 +85,6 @@ void updateMyData()
 
 /// Update angles the motors should turn ///
 
-void updateBearing()
-{
-    double bear = computeBearing(receivedLocation, myLocation);
-    bearingAngle_north = bear;// + myMagData.x;
-    if (!isBearingInit)
-    {
-        bearing0 = bear;
-        isBearingInit = true;
-        Serial.print("Bearing initialized");
-    }
-    else
-    {
-        bearing1 = bear;
-        // Serial.print("Delta Bearing Angle: ");
-        // Serial.println(bearing1 - bearing0);
-        bearingAngle = bearing1 - bearing0;
-        bearing0 = bearing1;
-    }
-}
-
 void updateVertical()
 {
     double verti = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
@@ -232,7 +212,7 @@ void receiveData()
         printReceivedData();
 
         myMagData = readMagnetometre();
-        updateBearing();
+        // updateBearing();
         updateVertical();
     }
     Serial.println("Finished");
@@ -243,7 +223,7 @@ int x = -90, y = -90, z = -90;
 int initCount = 0;
 
 void testMoteurCommand() {
-    if (initCount > 10)
+    if (initCount > 50)
     {
         count += 5;
         // receivedLocation[0] = int32_t((48.0000 + 0.001 * count) * 10000000);
@@ -254,8 +234,8 @@ void testMoteurCommand() {
     else {
         initCount++;
     }
-    updateBearing();
-    Serial.println(bearingAngle_north);
+    bearingAngle_north = updateBearing(receivedLocation, myLocation);
+    // Serial.println(bearingAngle_north);
     // updateVertical();
 }
 
@@ -285,7 +265,7 @@ void setup()
     // receiverConnect();
     receivedLocation[0] = myLocation[0] = 48 * 10000000;
     myLocation[1] = 2 * 10000000;
-    receivedLocation[1] = 2.001 * 10000000;
+    receivedLocation[1] = 2 * 10000000;
     bearingAngle_north = 0;
 
     Alex_createPackage(0, 0, 0);
