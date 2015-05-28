@@ -3,7 +3,7 @@
 #include <math.h>
 #include "SoftwareSerial.h"
 #include "Adafruit_GPS.h"
-#include <elapsedMillis.h>
+#include "elapsedMillis.h"
 #include "../setup/I2C.cpp"
 #include "../setup/BMP180.cpp"
 #include "../setup/kalman.cpp"
@@ -133,7 +133,7 @@ void setup()
     setupGPS();
 
     flush();
-    senderConnect();
+    // senderConnect();
 
     flush();
     delay(500);
@@ -144,14 +144,14 @@ void setup()
 
 void loop()
 {
-    
+
     if(timeElapsedAlt > refreshAlt){
         sendAltitude();
         timeElapsedAlt = 0;
     }
     // delay(300);
     if(timeElapsedLocation > refreshLocation){
-        sendLocation();  
+        sendLocation();
     }
     // testSensors_();
 }
