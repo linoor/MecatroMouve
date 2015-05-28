@@ -18,7 +18,7 @@ int count = 0;
 /*****************************************************************************/
 
 void setup() {
-    Serial.begin(57600); // texte ecran
+    Serial.begin(9600); // texte ecran
     //ble_begin();
     delay(1000);
     portAlex.begin(9600);//Alexmos
@@ -50,11 +50,12 @@ void loop() {
 
     param.mode = 2; //SBGC_CONTROL_MODE_ANGLE
     param.angleROLL = param.anglePITCH =0;
-    param.angleYAW = FAUL_DEGREE_TO_ANGLE(count*1);
+    param.angleYAW = FAUL_DEGREE_TO_ANGLE(count*2);
 	param.speedROLL = param.speedPITCH = param.speedYAW = 500;
         //Units: 0,1220740379 degree/sec
 	FAUL_sendCommand(SBGC_CMD_CONTROL, &param, sizeof(param));
     count++;
+    Serial.println(count);
     // Alex_createPackage(0, 0, count*1);
 	delay(200);
 

@@ -1,17 +1,23 @@
 // #define PI 3.141592654
 
+// this is not the real angle but a cache of the last result from computeBearing
 double bearingOrig;
 
+// each turn should be multiply by 360
+int cameraTurns = 0;
+
+// compute the bearing angle of loc1 and loc2
+// loc1: received gps = target
+// loc2: my gps = camera
 double computeBearing(int32_t loc1[], int32_t loc2[])
 {
     double lat1 = (double)loc1[0] / 10000000.0;
     double lng1 = (double)loc1[1] / 10000000.0;
     double lat2 = (double)loc2[0] / 10000000.0;
     double lng2 = (double)loc2[1] / 10000000.0;
-    // return atan((lat2-lat1)/cos(lat1*PI/180)/(lng2-lng1))*180/PI;
-    /*Serial.print("Loc1: ");Serial.print(lat1 * 10000000);Serial.print(" ");Serial.println(lng1 * 10000000);
-    Serial.print("Loc2: ");Serial.print(lat2 * 10000000);Serial.print(" ");Serial.println(lng2 * 10000000);*/
-    return atan((lng2-lng1)/(lat2-lat1)) * 180 / PI;
+    // Serial.print("--");Serial.println(atan2((lng1-lng2), (lat1-lat2)) * 180 / PI);
+    return atan2((lng1-lng2), (lat1-lat2)) * 180 / PI;
+    // return atan((lng2-lng1)/cos(lng1*PI/180)/(lat2-lat1)) * 180 / PI;
 }
 
 double computeVertical(int32_t loc1[], int32_t loc2[], float alti1, float alti2)
@@ -24,9 +30,29 @@ double computeVertical(int32_t loc1[], int32_t loc2[], float alti1, float alti2)
     return atan((alti1-alti2)/dist)*180/PI;
 }
 
-double realAngle(double bearingCur)
+double realAngle(double bearingDelta)
 {
-    switch(bearingState)
+    if (bearingDelta < -180)
+    {
+        cameraTurns++;
+    }
+    else if (bearingDelta >= -180 && bearingDelta  < 0)
+    {
+
+    }
+    else if (bearingDelta >= 0 && bearingDelta  < 180)
+    {
+    }
+    else if (bearingDelta >= 180)
+    {
+        cameraTurns--;
+    }
+    else {}
+    double bearingDeltaReal = bearingDelta + cameraTurns * 360;
+
+    return bearingOrig + bearingDeltaReal;
+
+    /*switch(bearingState)
     {
     case 1:
         if (bearingCur < 0)
@@ -61,25 +87,29 @@ double realAngle(double bearingCur)
         }
         return 360 + bearingCur;
         break;
-    }
+    }*/
 }
 
 double updateBearing(int32_t loc1[], int32_t loc2[])
 {
     double bearing = computeBearing(loc1, loc2);
-    // Serial.println(bearing);
+    // real bearing angle to move the motor
+    double bearingReal;
+
     if (!isBearingInit)
     {
-        bearingOrig = bearing;
+        bearingReal = bearingOrig = bearing;
         isBearingInit = true;
-        Serial.print("Bearing initialized");
+        // Serial.print("Bearing initialized");
     }
     else
     {
-        bearing = realAngle(bearing);
+        // Serial.print(bearing); Serial.print(" "); Serial.println(bearingOrig);
+        double bearingDelta = bearing - bearingOrig;
+        bearingReal = realAngle(bearingDelta);
         bearingOrig = bearing;
+        Serial.println(bearingReal);
     }
-    Serial.println(bearing);
-    return bearing;
+    return bearingReal;
 }
 

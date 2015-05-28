@@ -209,23 +209,24 @@ void receiveData()
             break;
         }
         updateMyData();
-        printReceivedData();
+        // printReceivedData();
 
-        myMagData = readMagnetometre();
+        // myMagData = readMagnetometre();
         // updateBearing();
-        updateVertical();
+        // updateVertical();
+        bearingAngle_north = updateBearing(receivedLocation, myLocation);
     }
     Serial.println("Finished");
 }
 
 int count = 0;
-int x = -90, y = -90, z = -90;
 int initCount = 0;
+bool clockwise = false;
 
 void testMoteurCommand() {
-    if (initCount > 50)
+    if (initCount > 20)
     {
-        count += 5;
+        count += ((clockwise)? -5 : 5);
         // receivedLocation[0] = int32_t((48.0000 + 0.001 * count) * 10000000);
         receivedLocation[0] = int32_t((48.0000 + 0.0001 * cos(count*PI/180)) * 10000000);
         receivedLocation[1] = int32_t((2.0000 + 0.0001 * sin(count*PI/180)) * 10000000);
@@ -235,6 +236,15 @@ void testMoteurCommand() {
         initCount++;
     }
     bearingAngle_north = updateBearing(receivedLocation, myLocation);
+
+    if (bearingAngle_north > 600)
+    {
+        clockwise = true;
+    }
+    else if (bearingAngle_north < -600)
+    {
+        clockwise = false;
+    }
     // Serial.println(bearingAngle_north);
     // updateVertical();
 }
@@ -242,7 +252,6 @@ void testMoteurCommand() {
 void sendMoteurCommand() {
     // MagnetometreData magnetometre_data = readMagnetometre();
     // Serial.print("bearing angle: ");Serial.println(bearingAngle_north);
-    // Serial.println(bearingAngle_north * 180 / PI);
     Alex_createPackage(
         0,
         0,
@@ -254,7 +263,7 @@ void sendMoteurCommand() {
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(57600);
     Wire.begin();
     Serial.println("Setting up...");
     portAlex.begin(9600);
@@ -262,8 +271,9 @@ void setup()
     setupGPS();
 
     flush();
-    // receiverConnect();
-    receivedLocation[0] = myLocation[0] = 48 * 10000000;
+    receiverConnect();
+    receivedLocation[0] = 48.0001 * 10000000;
+    myLocation[0] = 48 * 10000000;
     myLocation[1] = 2 * 10000000;
     receivedLocation[1] = 2 * 10000000;
     bearingAngle_north = 0;
@@ -275,8 +285,8 @@ void setup()
 
 void loop()
 {
-    // receiveData();
-    testMoteurCommand();
+    receiveData();
+    // testMoteurCommand();
     sendMoteurCommand();
     delay(200);
 }

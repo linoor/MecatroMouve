@@ -73,10 +73,10 @@ void Alex_createPackage(int roll, int pitch, int yaw) {
     // param.speedYAW = int16_t(abs(yaw - camera_Yaw) / 0.1220740379 / (updateTime / 1000.0));
     param.speedYAW = 500;
 
-    // Serial.print("Yaw: ");
-    // Serial.print(yaw);
-    // Serial.print(" ");
-    // Serial.println(param.angleYAW);
+    Serial.print("Yaw: ");
+    Serial.print(yaw);
+    Serial.print(" ");
+    Serial.println(param.angleYAW);
     // Serial.println(param.speedYAW);
 
     Alex_sendCommand(SBGC_CMD_CONTROL, &param, sizeof(param));
