@@ -4,12 +4,15 @@
 #include "SoftwareSerial.h"
 #include "Adafruit_GPS.h"
 
+#include <inttypes.h>
+
 #include "../setup/I2C.cpp"
 #include "../setup/BMP180.cpp"
 #include "../setup/kalman.cpp"
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
 #include "../setup/bearing.cpp"
+#include "../moteur/Alexmos.h"
 
 #define address 0x1E //0011110b, I2C 7bit address of HMC5883
 #define DISTANCE 3 // en mètres
@@ -33,10 +36,13 @@ int32_t myLocation[2];
 float receivedAlti;
 int32_t receivedLocation[2];
 
+MagnetometreData myMagData;
+
 double bearing0, bearing1;
 double verti0, verti1;
 
 double bearingAngle, verticalAngle;
+double bearingAngle_north, verticalAngle_north;
 
 
 // establish connection with sender
@@ -79,36 +85,20 @@ void updateMyData()
 
 /// Update angles the motors should turn ///
 
-void updateBearing()
-{
-    if (!isBearingInit)
-    {
-        bearing0 = computeBearing(receivedLocation, myLocation);
-        isBearingInit = true;
-        Serial.print("Bearing initialized");
-    }
-    else
-    {
-        bearing1 = computeBearing(receivedLocation, myLocation);
-        Serial.print("Delta Bearing Angle: ");
-        Serial.println(bearing1 - bearing0);
-        bearingAngle = bearing1 - bearing0;
-        bearing0 = bearing1;
-    }
-}
-
 void updateVertical()
 {
+    double verti = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+    verticalAngle_north = verti;// + myMagData.y;
     if (!isVertiInit)
     {
         Serial.println("Initializing vertical");
-        verti0 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        verti0 = verti;
         isVertiInit = true;
         Serial.print("Vertical initialized");
     }
     else
     {
-        verti1 = computeVertical(receivedLocation, myLocation, receivedAlti, myAlti);
+        verti1 = verti;
         Serial.print("Delta Vertical Bearing Angle: ");
         Serial.println(verti1 - verti0);
         verticalAngle = verti1 - verti0;
@@ -219,11 +209,54 @@ void receiveData()
             break;
         }
         updateMyData();
-        printReceivedData();
-        updateBearing();
-        updateVertical();
+        // printReceivedData();
+
+        // myMagData = readMagnetometre();
+        // updateBearing();
+        // updateVertical();
+        bearingAngle_north = updateBearing(receivedLocation, myLocation);
     }
     Serial.println("Finished");
+}
+
+int count = 0;
+int initCount = 0;
+bool clockwise = false;
+
+void testMoteurCommand() {
+    if (initCount > 20)
+    {
+        count += ((clockwise)? -5 : 5);
+        // receivedLocation[0] = int32_t((48.0000 + 0.001 * count) * 10000000);
+        receivedLocation[0] = int32_t((48.0000 + 0.0001 * cos(count*PI/180)) * 10000000);
+        receivedLocation[1] = int32_t((2.0000 + 0.0001 * sin(count*PI/180)) * 10000000);
+        // Serial.print(receivedLocation[0]);Serial.print(" ");Serial.println(receivedLocation[1]);
+    }
+    else {
+        initCount++;
+    }
+    bearingAngle_north = updateBearing(receivedLocation, myLocation);
+
+    if (bearingAngle_north > 600)
+    {
+        clockwise = true;
+    }
+    else if (bearingAngle_north < -600)
+    {
+        clockwise = false;
+    }
+    // Serial.println(bearingAngle_north);
+    // updateVertical();
+}
+
+void sendMoteurCommand() {
+    // MagnetometreData magnetometre_data = readMagnetometre();
+    // Serial.print("bearing angle: ");Serial.println(bearingAngle_north);
+    Alex_createPackage(
+        0,
+        0,
+        int(bearingAngle_north)
+        );
 }
 
 ////////////////////////////////////////
@@ -233,12 +266,19 @@ void setup()
     Serial.begin(57600);
     Wire.begin();
     Serial.println("Setting up...");
+    portAlex.begin(9600);
     setupBaro();
     setupGPS();
 
     flush();
     receiverConnect();
+    receivedLocation[0] = 48.0001 * 10000000;
+    myLocation[0] = 48 * 10000000;
+    myLocation[1] = 2 * 10000000;
+    receivedLocation[1] = 2 * 10000000;
+    bearingAngle_north = 0;
 
+    Alex_createPackage(0, 0, 0);
     flush();
     delay(500);
 }
@@ -246,5 +286,7 @@ void setup()
 void loop()
 {
     receiveData();
+    // testMoteurCommand();
+    sendMoteurCommand();
     delay(200);
 }

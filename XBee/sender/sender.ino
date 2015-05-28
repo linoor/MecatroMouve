@@ -36,6 +36,34 @@ void senderConnect() {
     }
 }
 
+
+int initCount = 0;
+int count = 0;
+bool clockwise = false;
+
+void getTestLocation(int32_t* loc) {
+    if (initCount > 20)
+    {
+        count += ((clockwise)? -5 : 5);
+        // receivedLocation[0] = int32_t((48.0000 + 0.001 * count) * 10000000);
+        loc[0] = int32_t((48.0000 + 0.0001 * cos(count*PI/180)) * 10000000);
+        loc[1] = int32_t((2.0000 + 0.0001 * sin(count*PI/180)) * 10000000);
+        // Serial.print(receivedLocation[0]);Serial.print(" ");Serial.println(receivedLocation[1]);
+    }
+    else {
+        initCount++;
+    }
+
+    if (count > 600)
+    {
+        clockwise = true;
+    }
+    else if (count < -600)
+    {
+        clockwise = false;
+    }
+}
+
 ////////// sending data //////////
 
 template <typename T>
@@ -80,6 +108,7 @@ void sendLocation()
 {
     int32_t myLocation[2];
     getGPSLocation(myLocation);
+    // getTestLocation(myLocation);
     bytes<int32_t> loc[2];
     loc[0].f = (int32_t)myLocation[0];
     loc[1].f = (int32_t)myLocation[1];
@@ -122,7 +151,6 @@ void testSensors_()
     Serial.println(myLocation[1]);
 }
 
-
 void setup()
 {
     Serial.begin(57600);
@@ -140,9 +168,9 @@ void setup()
 
 void loop()
 {
-    sendAltitude();
+    // sendAltitude();
     // delay(300);
-    // sendLocation();
+    sendLocation();
     // testSensors_();
     delay(300);
 }
