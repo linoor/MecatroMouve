@@ -105,7 +105,6 @@ void updateVertical()
         verti0 = verti1;
     }
 }
-
 ////////// Receiving sender data ///////////
 
 // after parsing START_SIGNAL and TYPE_SIGNAL
@@ -153,7 +152,7 @@ void printReceivedData()
 void receiveData()
 {
     Serial.println("Reading incoming data...");
-    if (!Serial.available()) return;
+    while (!Serial.available());
 
     while (Serial.read() != START_SIGNAL)
     {
@@ -272,6 +271,7 @@ void setup()
 
     flush();
     receiverConnect();
+
     receivedLocation[0] = 48.0001 * 10000000;
     myLocation[0] = 48 * 10000000;
     myLocation[1] = 2 * 10000000;
@@ -288,5 +288,4 @@ void loop()
     receiveData();
     // testMoteurCommand();
     sendMoteurCommand();
-    delay(200);
 }

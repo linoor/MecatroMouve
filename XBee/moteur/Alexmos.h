@@ -38,7 +38,6 @@ void Alex_updateBearing(int roll, int pitch, int yaw) {
     camera_Roll = roll;
 }
 
-
 //SendCommand Enoi de la trame vers alexmos
 void Alex_sendCommand(uint8_t cmd, void *data, uint16_t size)
 {   uint8_t i, checksum = 0;
