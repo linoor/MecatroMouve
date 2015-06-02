@@ -10,7 +10,7 @@
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
 
-#define DEBUG
+// #define DEBUG
 #define GPSECHO  false
 
 float mTemperature, mPressure, mAltitude;
@@ -179,8 +179,10 @@ void loop()
         sendAltitude();
         timeElapsedAlt = 0;
     }
+    // sendAltitude();
     // delay(300);
-    if (timeElapsedLocation > refreshLocation) {
-        sendLocation();
-    }
+    // if (timeElapsedLocation > refreshLocation) {
+    //     sendLocation();
+    //     timeElapsedLocation = 0;
+    // }
 }
