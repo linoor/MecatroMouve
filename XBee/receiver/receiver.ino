@@ -30,7 +30,6 @@ float correction = 0;
 int counter = 0;
 
 float myAlti;
-// double myLocation[2];
 int32_t myLocation[2];
 
 float receivedAlti;

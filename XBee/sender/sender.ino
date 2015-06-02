@@ -10,7 +10,7 @@
 #include "../setup/def.h"
 #include "../setup/setup.cpp"
 
-#define DEBUG
+// #define DEBUG
 #define GPSECHO  false
 
 float mTemperature, mPressure, mAltitude;
@@ -98,6 +98,7 @@ void sendAltitude()
 {
     bytes<float> alti[1];
     BMP180_getMeasurements(mTemperature, mPressure, mAltitude);
+    //mAltitude = kalman_update(&altitude_state, mAltitude);
     alti[0].f = mAltitude;
     sendData<float>(alti, 1, "a");
 #ifdef DEBUG
@@ -109,8 +110,9 @@ void sendAltitude()
 void sendLocation()
 {
     int32_t myLocation[2];
-    getGPSLocation(myLocation);
-    // getTestLocation(myLocation);
+    // getGPSLocation(myLocation);
+    myLocation[0] = 48.00001 * 10000000;
+    myLocation[1] = 2.0000 * 10000000;
     bytes<int32_t> loc[2];
     loc[0].f = (int32_t)myLocation[0];
     loc[1].f = (int32_t)myLocation[1];
@@ -170,7 +172,7 @@ void setup()
     timeElapsedAlt = 0;
     timeElapsedLocation = 0;
     refreshAlt = 300;
-    refreshLocation = 100;
+    refreshLocation = 300;
 }
 
 void loop()
@@ -182,5 +184,6 @@ void loop()
     // delay(300);
     if (timeElapsedLocation > refreshLocation) {
         sendLocation();
+        timeElapsedLocation = 0;
     }
 }
