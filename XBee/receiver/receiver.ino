@@ -105,6 +105,8 @@ void updateVertical()
         verti0 = verti1;
     }
 }
+
+
 ////////// Receiving sender data ///////////
 
 // after parsing START_SIGNAL and TYPE_SIGNAL
@@ -163,7 +165,7 @@ void receiveData()
     float alti;
     int32_t gpsData[2];
     char r;
-    r=Serial.read();
+    r = Serial.read();
     Serial.println("Read data: ");
     Serial.println(r);
 
@@ -179,7 +181,7 @@ void receiveData()
         readData<int32_t>(gpsData, 2);
         break;
     case 'd': // debug mode
-        while(Serial.read() != END_SIGNAL) {}
+        while (Serial.read() != END_SIGNAL) {}
         return;
     default:
         break;
@@ -225,10 +227,10 @@ bool clockwise = false;
 void testMoteurCommand() {
     if (initCount > 20)
     {
-        count += ((clockwise)? -5 : 5);
+        count += ((clockwise) ? -5 : 5);
         // receivedLocation[0] = int32_t((48.0000 + 0.001 * count) * 10000000);
-        receivedLocation[0] = int32_t((48.0000 + 0.0001 * cos(count*PI/180)) * 10000000);
-        receivedLocation[1] = int32_t((2.0000 + 0.0001 * sin(count*PI/180)) * 10000000);
+        receivedLocation[0] = int32_t((48.0000 + 0.0001 * cos(count * PI / 180)) * 10000000);
+        receivedLocation[1] = int32_t((2.0000 + 0.0001 * sin(count * PI / 180)) * 10000000);
         // Serial.print(receivedLocation[0]);Serial.print(" ");Serial.println(receivedLocation[1]);
     }
     else {
@@ -255,7 +257,7 @@ void sendMoteurCommand() {
         0,
         0,
         int(bearingAngle_north)
-        );
+    );
 }
 
 ////////////////////////////////////////

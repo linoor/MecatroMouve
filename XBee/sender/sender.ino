@@ -46,10 +46,10 @@ bool clockwise = false;
 void getTestLocation(int32_t* loc) {
     if (initCount > 20)
     {
-        count += ((clockwise)? -5 : 5);
+        count += ((clockwise) ? -5 : 5);
         // receivedLocation[0] = int32_t((48.0000 + 0.001 * count) * 10000000);
-        loc[0] = int32_t((48.0000 + 0.0001 * cos(count*PI/180)) * 10000000);
-        loc[1] = int32_t((2.0000 + 0.0001 * sin(count*PI/180)) * 10000000);
+        loc[0] = int32_t((48.0000 + 0.0001 * cos(count * PI / 180)) * 10000000);
+        loc[1] = int32_t((2.0000 + 0.0001 * sin(count * PI / 180)) * 10000000);
         // Serial.print(receivedLocation[0]);Serial.print(" ");Serial.println(receivedLocation[1]);
     }
     else {
@@ -100,10 +100,10 @@ void sendAltitude()
     BMP180_getMeasurements(mTemperature, mPressure, mAltitude);
     alti[0].f = mAltitude;
     sendData<float>(alti, 1, "a");
-    #ifdef DEBUG
+#ifdef DEBUG
     printDebugData<String>("\nCurrent Altitude: ");
     printDebugData<float>(alti[0].f);
-    #endif
+#endif
 }
 
 void sendLocation()
@@ -115,11 +115,11 @@ void sendLocation()
     loc[0].f = (int32_t)myLocation[0];
     loc[1].f = (int32_t)myLocation[1];
     sendData<int32_t>(loc, 2, "g");
-    #ifdef DEBUG
+#ifdef DEBUG
     printDebugData<String>("\nCurrent Location: ");
     printDebugData<int32_t>(myLocation[0]);
     printDebugData<int32_t>(myLocation[1]);
-    #endif
+#endif
 }
 
 ////////////  test sensors ////////////////
@@ -149,7 +149,7 @@ void testSensors_()
     int32_t myLocation[2];
     getGPSLocation(myLocation);
     Serial.println("\nCurrent Location: ");
-    Serial.print(myLocation[0]);Serial.print(", ");
+    Serial.print(myLocation[0]); Serial.print(", ");
     Serial.println(myLocation[1]);
 }
 
@@ -161,7 +161,7 @@ void setup()
     setupGPS();
 
     flush();
-    // senderConnect();
+    senderConnect();
 
     flush();
     delay(500);
@@ -175,12 +175,12 @@ void setup()
 
 void loop()
 {
-    if(timeElapsedAlt > refreshAlt){
+    if (timeElapsedAlt > refreshAlt) {
         sendAltitude();
         timeElapsedAlt = 0;
     }
     // delay(300);
-    if(timeElapsedLocation > refreshLocation){
+    if (timeElapsedLocation > refreshLocation) {
         sendLocation();
     }
 }
