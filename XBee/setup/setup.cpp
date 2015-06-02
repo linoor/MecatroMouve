@@ -7,8 +7,10 @@
 #include "BMP180.h"
 #ifndef KALMAN_H
 #define KALMAN_H
-    kalman_state altitude_state;
+kalman_state altitude_state;
 #endif
+
+#define address 0x1E //0011110b, I2C 7bit address of HMC5883
 
 byte OverSample = 0;
 
@@ -54,23 +56,63 @@ void setupGPS()
     Serial.println("GPS ready");
 }
 
+/////////////// Magnetometre ////////////////
+
+//Put the HMC5883 IC into the correct operating mode
+void setupMagnetometre() {
+    Wire.beginTransmission(address); //open communication with HMC5883
+    Wire.write(0x02); //select mode register
+    Wire.write(0x00); //continuous measurement mode
+    Wire.endTransmission();
+}
+
+struct MagnetometreData {
+    int x;
+    int y;
+    int z;
+};
+
+MagnetometreData readMagnetometre() {
+    //Tell the HMC5883L where to begin reading data
+    Wire.beginTransmission(address);
+    Wire.write(0x03); //select register 3, X MSB register
+    Wire.endTransmission();
+
+    Wire.requestFrom(address, 6);
+
+    MagnetometreData result;
+
+    if (6 <= Wire.available()) {
+        result.x = Wire.read() << 8; //X msb
+        result.x |= Wire.read(); //X lsb
+        result.z = Wire.read() << 8; //Z msb
+        result.z |= Wire.read(); //Z lsb
+        result.y = Wire.read() << 8; //Y msb
+        result.y |= Wire.read(); //Y lsb
+    }
+
+    return result;
+}
+
+////////////// End Magnetometre ////////////////
+
 // Interrupt is called once a millisecond, looks for any new GPS data, and stores it
 SIGNAL(TIMER0_COMPA_vect) {
-  char c = GPS.read();
+    char c = GPS.read();
 }
 
 void useInterrupt(bool v) {
-  if (v) {
-    // Timer0 is already used for millis() - we'll just interrupt somewhere
-    // in the middle and call the "Compare A" function above
-    OCR0A = 0xAF;
-    TIMSK0 |= _BV(OCIE0A);
-    usingInterrupt = true;
-  } else {
-    // do not call the interrupt function COMPA anymore
-    TIMSK0 &= ~_BV(OCIE0A);
-    usingInterrupt = false;
-  }
+    if (v) {
+        // Timer0 is already used for millis() - we'll just interrupt somewhere
+        // in the middle and call the "Compare A" function above
+        OCR0A = 0xAF;
+        TIMSK0 |= _BV(OCIE0A);
+        usingInterrupt = true;
+    } else {
+        // do not call the interrupt function COMPA anymore
+        TIMSK0 &= ~_BV(OCIE0A);
+        usingInterrupt = false;
+    }
 }
 
 void getGPSLocation(int32_t* location)

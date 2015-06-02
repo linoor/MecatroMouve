@@ -3,7 +3,7 @@
 #include <math.h>
 #include "SoftwareSerial.h"
 #include "Adafruit_GPS.h"
-
+#include "elapsedMillis.h"
 #include "../setup/I2C.cpp"
 #include "../setup/BMP180.cpp"
 #include "../setup/kalman.cpp"
@@ -14,6 +14,8 @@
 #define GPSECHO  false
 
 float mTemperature, mPressure, mAltitude;
+elapsedMillis timeElapsedAlt, timeElapsedLocation;
+long refreshAlt, refreshLocation;
 
 
 void senderConnect() {
@@ -33,6 +35,34 @@ void senderConnect() {
                 return;
             }
         }
+    }
+}
+
+
+int initCount = 0;
+int count = 0;
+bool clockwise = false;
+
+void getTestLocation(int32_t* loc) {
+    if (initCount > 20)
+    {
+        count += ((clockwise) ? -5 : 5);
+        // receivedLocation[0] = int32_t((48.0000 + 0.001 * count) * 10000000);
+        loc[0] = int32_t((48.0000 + 0.0001 * cos(count * PI / 180)) * 10000000);
+        loc[1] = int32_t((2.0000 + 0.0001 * sin(count * PI / 180)) * 10000000);
+        // Serial.print(receivedLocation[0]);Serial.print(" ");Serial.println(receivedLocation[1]);
+    }
+    else {
+        initCount++;
+    }
+
+    if (count > 600)
+    {
+        clockwise = true;
+    }
+    else if (count < -600)
+    {
+        clockwise = false;
     }
 }
 
@@ -70,25 +100,26 @@ void sendAltitude()
     BMP180_getMeasurements(mTemperature, mPressure, mAltitude);
     alti[0].f = mAltitude;
     sendData<float>(alti, 1, "a");
-    #ifdef DEBUG
+#ifdef DEBUG
     printDebugData<String>("\nCurrent Altitude: ");
     printDebugData<float>(alti[0].f);
-    #endif
+#endif
 }
 
 void sendLocation()
 {
     int32_t myLocation[2];
     getGPSLocation(myLocation);
+    // getTestLocation(myLocation);
     bytes<int32_t> loc[2];
     loc[0].f = (int32_t)myLocation[0];
     loc[1].f = (int32_t)myLocation[1];
     sendData<int32_t>(loc, 2, "g");
-    #ifdef DEBUG
+#ifdef DEBUG
     printDebugData<String>("\nCurrent Location: ");
     printDebugData<int32_t>(myLocation[0]);
     printDebugData<int32_t>(myLocation[1]);
-    #endif
+#endif
 }
 
 ////////////  test sensors ////////////////
@@ -118,10 +149,9 @@ void testSensors_()
     int32_t myLocation[2];
     getGPSLocation(myLocation);
     Serial.println("\nCurrent Location: ");
-    Serial.print(myLocation[0]);Serial.print(", ");
+    Serial.print(myLocation[0]); Serial.print(", ");
     Serial.println(myLocation[1]);
 }
-
 
 void setup()
 {
@@ -136,13 +166,21 @@ void setup()
     flush();
     delay(500);
     flush();
+
+    timeElapsedAlt = 0;
+    timeElapsedLocation = 0;
+    refreshAlt = 300;
+    refreshLocation = 100;
 }
 
 void loop()
 {
-    sendAltitude();
+    if (timeElapsedAlt > refreshAlt) {
+        sendAltitude();
+        timeElapsedAlt = 0;
+    }
     // delay(300);
-    // sendLocation();
-    // testSensors_();
-    delay(300);
+    if (timeElapsedLocation > refreshLocation) {
+        sendLocation();
+    }
 }
