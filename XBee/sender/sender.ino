@@ -181,6 +181,7 @@ void loop()
         sendAltitude();
         timeElapsedAlt = 0;
     }
+    // sendAltitude();
     // delay(300);
     if (timeElapsedLocation > refreshLocation) {
         sendLocation();
