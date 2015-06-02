@@ -288,6 +288,7 @@ void setup()
 void loop()
 {
     receiveData();
+    delay(300);
     // testMoteurCommand();
-   //sendMoteurCommand();
+    //sendMoteurCommand();
 }
