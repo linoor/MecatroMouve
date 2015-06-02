@@ -210,7 +210,7 @@ void receiveData()
             break;
         }
         updateMyData();
-        // printReceivedData();
+        printReceivedData();
 
         // myMagData = readMagnetometre();
         // updateBearing();
@@ -288,6 +288,7 @@ void setup()
 void loop()
 {
     receiveData();
+    delay(300);
     // testMoteurCommand();
-    sendMoteurCommand();
+    //sendMoteurCommand();
 }
