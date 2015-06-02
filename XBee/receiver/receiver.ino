@@ -166,7 +166,7 @@ void receiveData()
     int32_t gpsData[2];
     char r;
     r = Serial.read();
-    Serial.println("Read data: ");
+    //Serial.println("Read data: ");
     Serial.println(r);
 
     switch (r)
@@ -195,7 +195,7 @@ void receiveData()
     }
     else
     {
-        Serial.println(type);
+        //<Serial.println(type);
         switch (type)
         {
         case 'a':
@@ -210,12 +210,12 @@ void receiveData()
             break;
         }
         updateMyData();
-        // printReceivedData();
+        printReceivedData();
 
         // myMagData = readMagnetometre();
         // updateBearing();
-        // updateVertical();
-        bearingAngle_north = updateBearing(receivedLocation, myLocation);
+        updateVertical();
+        //ObearingAngle_north = updateBearing(receivedLocation, myLocation);
     }
     Serial.println("Finished");
 }
@@ -289,5 +289,5 @@ void loop()
 {
     receiveData();
     // testMoteurCommand();
-    sendMoteurCommand();
+   //sendMoteurCommand();
 }
