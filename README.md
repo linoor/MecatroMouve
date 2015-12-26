@@ -1,8 +1,8 @@
-GoMouve
+GoMouv'
 =======
 **prototype version 0.1**
 
-This document provides a tutorial on how to set up the micro-controller part of the [GoMouve](https://sites.google.com/site/20142015gr08/home) project, and explains how it works.
+This document provides a tutorial on how to set up the micro-controller part of the [GoMouv'](https://sites.google.com/site/20142015gr08/home) project, and explains how it works.
 
 ## Introduction
 It contains 2 Arduinos, one as *sender* (the moving target), the other as *receiver* (the camera).  
